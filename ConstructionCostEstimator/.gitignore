@@ -1,0 +1,71 @@
+# Build results
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code files
+.vscode/
+
+# Rider files
+.idea/
+
+# .NET build files
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+# NuGet packages
+*.nupkg
+**/packages/*
+.nuget/
+
+# Entity Framework / Database files
+*.db
+*.db-shm
+*.db-wal
+
+# SQLite database
+app.db
+
+# User-specific files
+*.rsuser
+
+# ASP.NET Core generated files
+wwwroot/lib/
+
+# Publish output
+publish/
+out/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files (may contain secrets)
+.env
+.env.*
+
+# Azure / deployment files
+.azure/
+
+# Test results
+TestResults/
+
+# Coverage reports
+coverage/
+
+# Ignore generated documentation
+*.xml
