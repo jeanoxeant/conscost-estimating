@@ -2,6 +2,48 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container py-5">
+    <div class="home-hero card border-0 shadow-lg overflow-hidden">
+        <div class="home-hero-content p-4 p-lg-5 text-center">
+            <span class="badge rounded-pill text-bg-light px-3 py-2 mb-3">Construction planning made simple</span>
+            <h1 class="display-5 fw-bold mb-3">Build accurate estimates with confidence.</h1>
+            <p class="lead mb-4">Create cleaner project estimates, organize your costs, and keep your construction workflow moving from kickoff to closeout.</p>
 
-Welcome to your new app.
+            <AuthorizeView>
+                <Authorized>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a class="btn btn-light btn-lg" href="projects">Go to Projects</a>
+                        <a class="btn btn-outline-light btn-lg" href="Account/Manage">Manage Account</a>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a class="btn btn-light btn-lg" href="Account/Login">Sign In</a>
+                        <a class="btn btn-outline-light btn-lg" href="Account/Register">Create Account</a>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-2">
+        <div class="col-md-4">
+            <div class="feature-card h-100">
+                <h3>Get Estimates</h3>
+                <p>Keep your materials, labor, equipment, taxes, and profit assumptions in one clean report.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card h-100">
+                <h3>Track Projects</h3>
+                <p>Easily keep track of your projects and their progress.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card h-100">
+                <h3>Stay Organized</h3>
+                <p>Use a focused dashboard that summarizes your project information at a glance.</p>
+            </div>
+        </div>
+    </div>
+</div>

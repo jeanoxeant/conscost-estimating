@@ -1,5 +1,9 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(30, 116, 180, 0.20), transparent 30%),
+        radial-gradient(circle at top right, rgba(247, 179, 66, 0.24), transparent 32%),
+        linear-gradient(180deg, #f4f8fb 0%, #eef4f8 100%);
 }
 
 a, .btn-link {
@@ -10,6 +14,83 @@ a, .btn-link {
     color: #fff;
     background-color: #1b6ec2;
     border-color: #1861ac;
+}
+
+.home-hero {
+    position: relative;
+    background:
+        linear-gradient(135deg, rgba(11, 59, 102, 0.94), rgba(19, 92, 150, 0.94)),
+        linear-gradient(90deg, #0b3b66, #135c96);
+    color: #fff;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: 0 1rem 3rem rgba(11, 59, 102, 0.22);
+}
+
+.home-hero::before,
+.home-hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+}
+
+.home-hero::before {
+    width: 220px;
+    height: 220px;
+    top: -90px;
+    right: -50px;
+    background: rgba(255, 200, 92, 0.35);
+}
+
+.home-hero::after {
+    width: 180px;
+    height: 180px;
+    bottom: -70px;
+    left: -45px;
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.home-hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.home-hero h1,
+.home-hero p,
+.home-hero .badge {
+    text-align: center;
+}
+
+.home-hero .lead {
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.home-hero .btn {
+    min-width: 170px;
+}
+
+.feature-card {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 0 0.25rem 1rem rgba(11, 59, 102, 0.08);
+    border-top: 4px solid #1b6ec2;
+}
+
+.feature-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+    margin-bottom: 0;
+    color: #4b5c6b;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
