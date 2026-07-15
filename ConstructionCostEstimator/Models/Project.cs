@@ -9,6 +9,8 @@ namespace ConstructionCostEstimator.Models
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public ProjectStatus Status { get; set; } = ProjectStatus.Planned;
+        // Materials linked to this project
+        public List<ProjectMaterial> ProjectMaterials { get; set; } = new();
     }
 
     public enum ProjectStatus
