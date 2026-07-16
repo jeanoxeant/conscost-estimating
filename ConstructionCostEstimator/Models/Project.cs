@@ -1,3 +1,5 @@
+using ConstructionCostEstimator.Data;
+
 namespace ConstructionCostEstimator.Models
 {
     public class Project
@@ -9,6 +11,10 @@ namespace ConstructionCostEstimator.Models
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public ProjectStatus Status { get; set; } = ProjectStatus.Planned;
+
+        public string ApplicationUserId { get; set; } = string.Empty;
+        public ApplicationUser? Owner { get; set; }
+
         // Materials linked to this project
         public List<ProjectMaterial> ProjectMaterials { get; set; } = new();
     }
