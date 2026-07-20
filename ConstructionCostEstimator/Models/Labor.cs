@@ -1,7 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ConstructionEstimator.Models
+namespace ConstructionCostEstimator.Models
 {
+    /// <summary>
+    /// Catalog entity for labor entries used in construction cost estimates.
+    /// Each labor record can be assigned to multiple projects through the join table.
+    /// </summary>
     public class Labor
     {
         public int Id { get; set; }
