@@ -1,0 +1,52 @@
+@using ConstructionCostEstimator.Models
+
+<EditForm Model="MaterialModel" OnValidSubmit="Save">
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row">
+
+        <div class="col-md-4">
+            <label>Material ID</label>
+            <InputNumber class="form-control"
+                         @bind-Value="MaterialModel.MaterialId" />
+        </div>
+
+        <div class="col-md-2">
+            <label>Quantity</label>
+            <InputNumber class="form-control"
+                         @bind-Value="MaterialModel.Quantity" />
+        </div>
+
+        <div class="col-md-2">
+            <label>Unit Price</label>
+            <InputNumber class="form-control"
+                         @bind-Value="MaterialModel.UnitPrice" />
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <label>&nbsp;</label>
+            <button class="btn btn-success" type="submit">
+                Save
+            </button>
+        </div>
+
+    </div>
+
+</EditForm>
+
+@code{
+
+    [Parameter]
+    public ProjectMaterial MaterialModel { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<ProjectMaterial> OnSave { get; set; }
+
+    async Task Save()
+    {
+        await OnSave.InvokeAsync(MaterialModel);
+    }
+
+}

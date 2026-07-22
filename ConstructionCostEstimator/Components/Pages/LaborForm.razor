@@ -1,0 +1,63 @@
+@using ConstructionCostEstimator.Models
+@using ConstructionCostEstimator.Services
+
+<EditForm Model="LaborModel" OnValidSubmit="Save">
+
+    <DataAnnotationsValidator />
+
+    <ValidationSummary />
+
+    <div class="row">
+
+        <div class="col-md-3">
+            <label>Description</label>
+            <InputText class="form-control"
+                       @bind-Value="LaborModel.Description" />
+        </div>
+
+        <div class="col-md-2">
+            <label>Workers</label>
+            <InputNumber class="form-control"
+                         @bind-Value="LaborModel.Workers" />
+        </div>
+
+        <div class="col-md-2">
+            <label>Hours</label>
+            <InputNumber class="form-control"
+                         @bind-Value="LaborModel.Hours" />
+        </div>
+
+        <div class="col-md-2">
+            <label>Hourly Rate</label>
+            <InputNumber class="form-control"
+                         @bind-Value="LaborModel.HourlyRate" />
+        </div>
+
+        <div class="col-md-2 d-grid">
+
+            <label>&nbsp;</label>
+
+            <button class="btn btn-success">
+                Save
+            </button>
+
+        </div>
+
+    </div>
+
+</EditForm>
+
+@code{
+
+    [Parameter]
+    public Labor LaborModel { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<Labor> OnSave { get; set; }
+
+    async Task Save()
+    {
+        await OnSave.InvokeAsync(LaborModel);
+    }
+
+}

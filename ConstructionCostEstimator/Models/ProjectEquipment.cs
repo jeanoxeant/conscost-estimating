@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+//using ConstructionCostEstimator.Services;
 
 namespace ConstructionCostEstimator.Models
 {

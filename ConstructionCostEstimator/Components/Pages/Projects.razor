@@ -1,7 +1,142 @@
 @page "/projects"
-@attribute [Authorize]
+
+@using ConstructionCostEstimator.Models
+@using ConstructionCostEstimator.Services
+@using ConstructionCostEstimator.Components.Pages
+@inject ProjectService ProjectService
 
 <PageTitle>Projects</PageTitle>
 
-<h1>Projects</h1>
-<p>Manage your construction projects here.</p>
+<h2 class="mb-4">
+    Construction Projects
+</h2>
+
+<button class="btn btn-primary mb-3"
+        @onclick="NewProject">
+    New Project
+</button>
+
+@if (projects == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+
+        <thead>
+
+        <tr>
+
+            <th>Name</th>
+
+            <th>Status</th>
+            <th>Start Date</th>
+
+            <th></th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        @foreach (var project in projects)
+        {
+            <tr>
+
+                <td>@project.Name</td>
+
+                <td>@project.Status</td>
+                <td>@project.StartDate.ToShortDateString()</td>
+
+                <td>
+
+                    <button class="btn btn-sm btn-warning"
+                            @onclick="() => EditProject(project)">
+                        Edit
+                    </button>
+
+                    <button class="btn btn-sm btn-danger"
+                            @onclick="() => DeleteProject(project.Id)">
+                        Delete
+                    </button>
+
+                </td>
+
+            </tr>
+        }
+
+        </tbody>
+
+    </table>
+}
+
+@code{
+
+    private List<Project> projects = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProjects();
+    }
+
+    async Task LoadProjects()
+    {
+        projects = await ProjectService.GetProjectsAsync();
+    }
+
+    async Task DeleteProject(int id)
+    {
+        await ProjectService.DeleteProjectAsync(id);
+        await LoadProjects();
+    }
+
+   Project currentProject = new();
+
+    bool showForm = false;
+
+    void NewProject()
+    {
+        currentProject = new();
+        showForm = true;
+    }
+
+    void EditProject(Project project)
+    {
+        currentProject = new Project
+        {
+            Id = project.Id,
+            Name = project.Name,
+            Description = project.Description,
+            EstimatedCost = project.EstimatedCost,
+            StartDate = project.StartDate,
+            EndDate = project.EndDate,
+            Status = project.Status,
+            ApplicationUserId = project.ApplicationUserId
+        };
+
+        showForm = true;
+    }
+
+    async Task SaveProject(Project project)
+    {
+        if (project.Id == 0)
+            await ProjectService.AddProjectAsync(project);
+        else
+            await ProjectService.UpdateProjectAsync(project);
+
+        showForm = false;
+
+        await LoadProjects();
+    }
+
+}
+
+@if (showForm)
+{
+    <hr />
+
+    <ProjectForm ProjectModel="currentProject"
+                 OnSave="SaveProject" />
+}

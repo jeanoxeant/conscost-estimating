@@ -1,0 +1,71 @@
+@using ConstructionCostEstimator.Models
+
+<EditForm Model="ProjectModel" OnValidSubmit="Save">
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Project Name</label>
+        <InputText class="form-control"
+                   @bind-Value="ProjectModel.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label>Description</label>
+        <InputTextArea class="form-control"
+                       @bind-Value="ProjectModel.Description" />
+    </div>
+
+    <div class="mb-3">
+        <label>Estimated Cost</label>
+        <InputNumber class="form-control"
+                     @bind-Value="ProjectModel.EstimatedCost" />
+    </div>
+
+    <div class="mb-3">
+        <label>Start Date</label>
+        <InputDate class="form-control"
+                   @bind-Value="ProjectModel.StartDate" />
+    </div>
+
+    <div class="mb-3">
+        <label>End Date</label>
+        <InputDate class="form-control"
+                   @bind-Value="ProjectModel.EndDate" />
+    </div>
+
+    <div class="mb-3">
+        <label>Status</label>
+
+        <InputSelect class="form-select"
+                     @bind-Value="ProjectModel.Status">
+
+            @foreach (ProjectStatus status in Enum.GetValues<ProjectStatus>())
+            {
+                <option value="@status">@status</option>
+            }
+
+        </InputSelect>
+    </div>
+
+    <button class="btn btn-success" type="submit">
+        Save Project
+    </button>
+
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public Project ProjectModel { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<Project> OnSave { get; set; }
+
+    private async Task Save()
+    {
+        await OnSave.InvokeAsync(ProjectModel);
+    }
+
+}
