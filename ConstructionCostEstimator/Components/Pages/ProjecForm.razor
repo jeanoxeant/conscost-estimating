@@ -1,0 +1,95 @@
+@using ConstructionCostEstimator.Models
+
+<!--
+    Reusable form for both creating and editing projects.
+    The form determines its mode based on whether the project already exists (Id > 0).
+-->
+<h3>
+    @(ProjectModel.Id == 0 ? "Create Project" : "Edit Project")
+</h3>
+
+<EditForm Model="ProjectModel" OnValidSubmit="Save">
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Project Name</label>
+        <InputText class="form-control" @bind-Value="ProjectModel.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label>Description</label>
+        <InputTextArea class="form-control" @bind-Value="ProjectModel.Description" />
+    </div>
+
+    <div class="mb-3">
+        <label>Estimated Cost</label>
+        <InputNumber class="form-control" @bind-Value="ProjectModel.EstimatedCost" />
+    </div>
+
+    <div class="mb-3">
+        <label>Start Date</label>
+        <InputDate class="form-control" @bind-Value="ProjectModel.StartDate" />
+    </div>
+
+    <div class="mb-3">
+        <label>End Date</label>
+        <InputDate class="form-control" @bind-Value="ProjectModel.EndDate" />
+    </div>
+
+    <div class="mb-3">
+        <label>Status</label>
+
+        <InputSelect class="form-select" @bind-Value="ProjectModel.Status">
+
+            @foreach (ProjectStatus status in Enum.GetValues<ProjectStatus>())
+            {
+                <option value="@status">@status</option>
+            }
+
+        </InputSelect>
+
+    </div>
+
+    <button class="btn btn-success" type="submit">
+        @(ProjectModel.Id == 0 ? "Create Project" : "Save Changes")
+    </button>
+
+    <!--
+        Allows users to exit the form without saving changes.
+        This improves the editing workflow by letting users discard modifications.
+    -->
+    <button class="btn btn-secondary ms-2" type="button" @onclick="Cancel">
+        Cancel
+    </button>
+
+</EditForm>
+
+@code {
+
+    // Receives the project being created or edited from the parent page.
+    [Parameter]
+    public Project ProjectModel { get; set; } = new();
+
+    // Callback executed when the form is successfully validated and saved.
+    // The parent component is responsible for creating or updating the project.
+    [Parameter]
+    public EventCallback<Project> OnSave { get; set; }
+
+    // Callback executed when the user cancels the operation.
+    // The parent component decides how to close or reset the form.
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private async Task Save()
+    {
+        await OnSave.InvokeAsync(ProjectModel);
+    }
+
+    private async Task Cancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+}
