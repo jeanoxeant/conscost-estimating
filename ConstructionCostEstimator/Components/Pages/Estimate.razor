@@ -1,0 +1,96 @@
+@page "/estimate"
+
+@using ConstructionCostEstimator.Services
+
+@inject EstimateService EstimateService
+
+<h2>Project Estimate</h2>
+
+@if (loaded)
+{
+    <table class="table table-bordered">
+
+        <tr>
+            <th>Materials</th>
+            <td>@MaterialTotal.ToString("C")</td>
+        </tr>
+
+        <tr>
+            <th>Labor</th>
+            <td>@LaborTotal.ToString("C")</td>
+        </tr>
+
+        <tr>
+            <th>Equipment</th>
+            <td>@EquipmentTotal.ToString("C")</td>
+        </tr>
+
+        <tr class="table-secondary">
+            <th>Subtotal</th>
+            <td>@Subtotal.ToString("C")</td>
+        </tr>
+
+        <tr>
+            <th>Tax (7%)</th>
+            <td>@Tax.ToString("C")</td>
+        </tr>
+
+        <tr>
+            <th>Overhead (10%)</th>
+            <td>@Overhead.ToString("C")</td>
+        </tr>
+
+        <tr>
+            <th>Profit (15%)</th>
+            <td>@Profit.ToString("C")</td>
+        </tr>
+
+        <tr class="table-success">
+            <th>Grand Total</th>
+            <td>
+                <strong>@GrandTotal.ToString("C")</strong>
+            </td>
+        </tr>
+
+    </table>
+}
+
+@code{
+
+    [Parameter]
+    public int ProjectId { get; set; }
+
+    decimal MaterialTotal;
+    decimal LaborTotal;
+    decimal EquipmentTotal;
+
+    decimal Subtotal;
+    decimal Tax;
+    decimal Overhead;
+    decimal Profit;
+    decimal GrandTotal;
+
+    bool loaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        MaterialTotal = await EstimateService.GetMaterialTotal(ProjectId);
+
+        LaborTotal = await EstimateService.GetLaborTotal(ProjectId);
+
+        EquipmentTotal = await EstimateService.GetEquipmentTotal(ProjectId);
+
+        Subtotal = MaterialTotal + LaborTotal + EquipmentTotal;
+
+        Tax = Subtotal * .07m;
+
+        Overhead = Subtotal * .10m;
+
+        Profit = (Subtotal + Tax + Overhead) * .15m;
+
+        GrandTotal = Subtotal + Tax + Overhead + Profit;
+
+        loaded = true;
+    }
+
+}

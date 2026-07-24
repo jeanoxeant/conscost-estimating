@@ -1,0 +1,112 @@
+@page "/material"
+
+@using ConstructionCostEstimator.Models
+@using ConstructionCostEstimator.Services
+
+@inject MaterialService MaterialService
+
+<h3>Materials</h3>
+
+<MaterialForm MaterialModel="material"
+              OnSave="SaveMaterial" />
+
+<hr />
+
+<table class="table table-bordered">
+
+    <thead>
+
+        <tr>
+
+            <th>Name</th>
+
+            <th>Qty</th>
+
+            <th>Unit</th>
+
+            <th>Price</th>
+
+            <th>Total</th>
+
+            <th></th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    @foreach(var item in materials)
+    {
+        <tr>
+
+            <td>@item.Material?.Name</td>
+            <td>@item.Quantity</td>
+            <td>@item.Material?.Unit</td>
+            <td>@item.UnitPrice.ToString("C")</td>
+            <td>@item.TotalCost.ToString("C")</td>
+
+            <td>
+
+                <button class="btn btn-danger btn-sm"
+                        @onclick="() => Delete(item.Id)">
+                    Delete
+                </button>
+
+            </td>
+
+        </tr>
+    }
+
+    </tbody>
+
+</table>
+
+<h4 class="text-end">
+    Total:
+    @total.ToString("C")
+</h4>
+
+@code{
+
+    [Parameter]
+    public int ProjectId { get; set; }
+
+    List<ProjectMaterial> materials = new();
+
+    ProjectMaterial material = new();
+
+    decimal total;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    async Task Load()
+    {
+        materials = await MaterialService.GetMaterialsAsync(ProjectId);
+
+        total = await MaterialService.GetMaterialTotalAsync(ProjectId);
+
+        material = new ProjectMaterial
+        {
+            ProjectId = ProjectId
+        };
+    }
+
+    async Task SaveMaterial(ProjectMaterial m)
+    {
+        await MaterialService.AddMaterialAsync(m);
+
+        await Load();
+    }
+
+    async Task Delete(int id)
+    {
+        await MaterialService.DeleteMaterialAsync(id);
+
+        await Load();
+    }
+
+}

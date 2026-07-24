@@ -1,0 +1,105 @@
+@page "/labor"
+
+@using ConstructionCostEstimator.Models
+@using ConstructionCostEstimator.Services
+
+@inject LaborService LaborService
+
+<h3>Labor</h3>
+
+<LaborForm LaborModel="labor"
+           OnSave="SaveLabor" />
+
+<hr />
+
+<table class="table table-striped">
+
+    <thead>
+
+        <tr>
+
+            <th>Description</th>
+            <th>Workers</th>
+            <th>Hours</th>
+            <th>Rate</th>
+            <th>Total</th>
+            <th></th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    @foreach(var item in labors)
+    {
+        <tr>
+
+            <td>@item.Description</td>
+
+            <td>@item.Workers</td>
+
+            <td>@item.Hours</td>
+
+            <td>@item.HourlyRate.ToString("C")</td>
+
+            <td>@item.TotalCost.ToString("C")</td>
+
+            <td>
+
+                <button class="btn btn-danger btn-sm"
+                        @onclick="() => Delete(item.Id)">
+                    Delete
+                </button>
+
+            </td>
+
+        </tr>
+    }
+
+    </tbody>
+
+</table>
+
+<h4 class="text-end">
+    Total Labor:
+    @total.ToString("C")
+</h4>
+
+@code {
+
+    [Parameter]
+    public int ProjectId { get; set; }
+
+    private List<Labor> labors = new();
+    private Labor labor = new();
+    private decimal total;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        labors = await LaborService.GetLaborAsync(ProjectId);
+        total = await LaborService.GetLaborTotalAsync(ProjectId);
+
+        labor = new Labor
+        {
+            ProjectId = ProjectId
+        };
+    }
+
+    private async Task SaveLabor(Labor laborItem)
+    {
+        await LaborService.AddLaborAsync(laborItem);
+        await Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        await LaborService.DeleteLaborAsync(id);
+        await Load();
+    }
+}

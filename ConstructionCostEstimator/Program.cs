@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ConstructionCostEstimator.Components;
 using ConstructionCostEstimator.Components.Account;
 using ConstructionCostEstimator.Data;
+using ConstructionCostEstimator.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,14 @@ builder.Services.AddAuthentication(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
+
+    builder.Services.AddScoped<LaborService>();
+    builder.Services.AddScoped<EquipmentService>();
+    builder.Services.AddScoped<MaterialService>();
+    builder.Services.AddScoped<ProjectService>();
+    builder.Services.AddScoped<EstimateService>();
+
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>

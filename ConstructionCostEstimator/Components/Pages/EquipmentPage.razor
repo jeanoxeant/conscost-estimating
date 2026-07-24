@@ -1,0 +1,98 @@
+@page "/equipment"
+
+@using ConstructionCostEstimator.Models
+@using ConstructionCostEstimator.Services
+
+@inject EquipmentService EquipmentService
+
+<h3>Equipment</h3>
+
+<EquipmentForm EquipmentModel="equipment"
+               OnSave="SaveEquipment" />
+
+<hr />
+
+<table class="table table-striped">
+
+    <thead>
+
+        <tr>
+            <th>Name</th>
+            <th>Days</th>
+            <th>Daily Rate</th>
+            <th>Total</th>
+            <th></th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    @foreach (var item in equipmentList)
+    {
+        <tr>
+
+            <td>@item.Name</td>
+
+            <td>@item.Days</td>
+
+            <td>@item.DailyRate.ToString("C")</td>
+
+            <td>@item.TotalCost.ToString("C")</td>
+
+            <td>
+                <button class="btn btn-danger btn-sm"
+                        @onclick="() => Delete(item.Id)">
+                    Delete
+                </button>
+            </td>
+
+        </tr>
+    }
+
+    </tbody>
+
+</table>
+
+<h4 class="text-end">
+    Equipment Total:
+    @equipmentTotal.ToString("C")
+</h4>
+
+@code {
+
+    [Parameter]
+    public int ProjectId { get; set; }
+
+    private List<Equipment> equipmentList = new();
+    private Equipment equipment = new();
+    private decimal equipmentTotal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        equipmentList = await EquipmentService.GetEquipmentAsync(ProjectId);
+        equipmentTotal = await EquipmentService.GetEquipmentTotalAsync(ProjectId);
+
+        equipment = new Equipment
+        {
+            ProjectId = ProjectId
+        };
+    }
+
+    private async Task SaveEquipment(Equipment item)
+    {
+        await EquipmentService.AddEquipmentAsync(item);
+        await Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        await EquipmentService.DeleteEquipmentAsync(id);
+        await Load();
+    }
+}

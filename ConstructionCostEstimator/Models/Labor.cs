@@ -1,29 +1,26 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ConstructionCostEstimator.Models
+namespace ConstructionCostEstimator.Models;
+
+public class Labor
 {
-    /// <summary>
-    /// Catalog entity for labor entries used in construction cost estimates.
-    /// Each labor record can be assigned to multiple projects through the join table.
-    /// </summary>
-    public class Labor
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string Description { get; set; } = string.Empty;
+    public int ProjectId { get; set; }
 
-        [Required]
-        [Range(0, 100000)]
-        public decimal Hours { get; set; }
+    [Required]
+    public string Description { get; set; } = "";
 
-        [Required]
-        [Range(0, 100000)]
-        public decimal HourlyRate { get; set; }
+    public int Workers { get; set; }
 
-        public decimal TotalCost => Hours * HourlyRate;
+    public decimal Hours { get; set; }
 
-        public string? Notes { get; set; }
-    }
+    public decimal HourlyRate { get; set; }
+
+    [NotMapped]
+    public decimal TotalCost =>
+        Workers * Hours * HourlyRate;
+
+    public Project? Project { get; set; }
 }
