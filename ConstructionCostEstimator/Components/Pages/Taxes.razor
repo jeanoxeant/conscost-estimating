@@ -1,0 +1,31 @@
+@using ConstructionCostEstimator.Models
+
+<EditForm Model="TaxModel" OnValidSubmit="Save">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row">
+        <div class="col-md-6">
+            <label class="form-label">Tax Amount</label>
+            <InputNumber class="form-control" @bind-Value="TaxModel.TaxAmount" />
+        </div>
+
+        <div class="col-md-3 d-grid">
+            <label>&nbsp;</label>
+            <button class="btn btn-success" type="submit">Save</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public ConstructionCostEstimator.Models.Estimate TaxModel { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<ConstructionCostEstimator.Models.Estimate> OnSave { get; set; }
+
+    private async Task Save()
+    {
+        await OnSave.InvokeAsync(TaxModel);
+    }
+}

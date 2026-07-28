@@ -40,7 +40,21 @@ public class ProjectService
 
     public async Task UpdateProjectAsync(Project project)
     {
-        _context.Projects.Update(project);
+        var existingProject = await _context.Projects.FindAsync(project.Id);
+
+        if (existingProject is null)
+        {
+            return;
+        }
+
+        existingProject.Name = project.Name;
+        existingProject.Description = project.Description;
+        existingProject.EstimatedCost = project.EstimatedCost;
+        existingProject.StartDate = project.StartDate;
+        existingProject.EndDate = project.EndDate;
+        existingProject.Status = project.Status;
+        existingProject.ApplicationUserId = project.ApplicationUserId;
+
         await _context.SaveChangesAsync();
     }
 
