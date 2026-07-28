@@ -14,11 +14,22 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager Navigation
+@inject EquipmentService EquipmentService
+@inject LaborService LaborService
+@inject MaterialService MaterialService
 
 <PageTitle>Projects</PageTitle>
-<p>Show Form: @showForm</p>
 
 <div class="projects-dashboard">
+
+    @if (showForm)
+    {
+        <div class="mt-4 mb-4">
+            <ProjectForm ProjectModel="currentProject"
+                         OnSave="SaveProject"
+                         OnCancel="CancelForm" />
+        </div>
+    }
 
     <div class="projects-hero card border-0 shadow-sm">
         <div class="card-body p-4 p-lg-5">
@@ -127,6 +138,11 @@
 
             </div>
 
+            <button class="btn btn-primary"
+                    @onclick="NewProject">
+                Create New Project
+            </button>
+
         </div>
 
         @if (projects.Count == 0)
@@ -211,9 +227,9 @@
 
                                         <h5>
 
-                                            @(project.StartDate == default
-                                                ? "TBD"
-                                                : project.StartDate.ToShortDateString())
+                                            @(project.StartDate.HasValue
+                                                ? project.StartDate.Value.ToShortDateString()
+                                                : "TBD")
 
                                         </h5>
 
@@ -221,12 +237,19 @@
 
                                 </div>
 
-                                <div class="mt-4 d-flex gap-2">
+                                <div class="mt-4 d-flex gap-2 flex-wrap">
 
                                     <button class="btn btn-outline-primary btn-sm"
-                                            @onclick="() => NavigateToEdit(project.Id)">
+                                            @onclick="() => EditProject(project)">
 
                                         Edit
+
+                                    </button>
+
+                                    <button class="btn btn-outline-secondary btn-sm"
+                                            @onclick="() => OpenProjectDetails(project)">
+
+                                        Add Details
 
                                     </button>
 
@@ -251,6 +274,69 @@
 
     </div>
 </div>
+
+@if (activeProjectForDetails != null)
+{
+    <div class="card shadow-sm border-0 mt-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5 class="mb-1">Add project details</h5>
+                    <p class="text-muted mb-0">
+                        Attach equipment, labor, materials, and taxes to @activeProjectForDetails.Name.
+                    </p>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <button class="btn btn-outline-primary btn-sm" @onclick='() => SetActiveDetailSection("equipment")'>
+                    Add Equipment
+                </button>
+                <button class="btn btn-outline-primary btn-sm" @onclick='() => SetActiveDetailSection("labor")'>
+                    Add Labor
+                </button>
+                <button class="btn btn-outline-primary btn-sm" @onclick='() => SetActiveDetailSection("materials")'>
+                    Add Materials
+                </button>
+                <button class="btn btn-outline-primary btn-sm" @onclick='() => SetActiveDetailSection("taxes")'>
+                    Add Taxes
+                </button>
+            </div>
+
+            @if (activeDetailSection == "equipment")
+            {
+                <div class="mt-4 border rounded p-3">
+                    <h6 class="mb-3">Equipment</h6>
+                    <EquipmentForm EquipmentModel="equipmentDraft" OnSave="HandleEquipmentSave" />
+                </div>
+            }
+
+            @if (activeDetailSection == "labor")
+            {
+                <div class="mt-4 border rounded p-3">
+                    <h6 class="mb-3">Labor</h6>
+                    <LaborForm LaborModel="laborDraft" OnSave="HandleLaborSave" />
+                </div>
+            }
+
+            @if (activeDetailSection == "materials")
+            {
+                <div class="mt-4 border rounded p-3">
+                    <h6 class="mb-3">Materials</h6>
+                    <MaterialForm MaterialModel="materialDraft" OnSave="HandleMaterialSave" />
+                </div>
+            }
+
+            @if (activeDetailSection == "taxes")
+            {
+                <div class="mt-4 border rounded p-3">
+                    <h6 class="mb-3">Taxes</h6>
+                    <Taxes TaxModel="taxDraft" OnSave="HandleTaxSave" />
+                </div>
+            }
+        </div>
+    </div>
+}
 
 @if (selectedProject != null)
 {
@@ -302,14 +388,6 @@
     </div>
 }
 
-@if (showForm)
-{
-    <hr />
-
-    <ProjectForm ProjectModel="currentProject"
-                 OnSave="SaveProject" />
-}
-
 @code
 {
     private List<Project> projects = new();
@@ -321,6 +399,13 @@
     private string confirmationText = "";
 
     private bool showForm = false;
+
+    private Project? activeProjectForDetails;
+    private string? activeDetailSection;
+    private Equipment equipmentDraft = new();
+    private Labor laborDraft = new();
+    private ProjectMaterial materialDraft = new();
+    private ConstructionCostEstimator.Models.Estimate taxDraft = new();
 
     private int activeProjects =>
         projects.Count(p => p.Status == ProjectStatus.Active);
@@ -352,11 +437,10 @@
 
     private void NewProject()
     {
-        Console.WriteLine("Button clicked");
-
         currentProject = new Project();
         showForm = true;
-
+        activeProjectForDetails = null;
+        activeDetailSection = null;
         StateHasChanged();
     }
 
@@ -375,6 +459,27 @@
         };
 
         showForm = true;
+        activeProjectForDetails = project;
+        activeDetailSection = null;
+        StateHasChanged();
+    }
+
+    private void OpenProjectDetails(Project project)
+    {
+        showForm = false;
+        currentProject = new Project();
+        activeProjectForDetails = project;
+        activeDetailSection = null;
+        StateHasChanged();
+    }
+
+    private void CancelForm()
+    {
+        showForm = false;
+        currentProject = new Project();
+        activeProjectForDetails = null;
+        activeDetailSection = null;
+        StateHasChanged();
     }
 
     private async Task SaveProject(Project project)
@@ -384,31 +489,136 @@
 
         if (user == null)
         {
-            // User is not logged in.
             return;
         }
 
         project.ApplicationUserId = user.Id;
 
         if (project.Id == 0)
+        {
             await ProjectService.AddProjectAsync(project);
+        }
         else
+        {
             await ProjectService.UpdateProjectAsync(project);
+        }
 
         showForm = false;
         currentProject = new Project();
+        activeProjectForDetails = project;
+        activeDetailSection = null;
 
+        await LoadProjects();
+        StateHasChanged();
+    }
+
+    private void SetActiveDetailSection(string? section)
+    {
+        activeDetailSection = section;
+
+        if (section == "equipment")
+        {
+            equipmentDraft = new Equipment();
+        }
+        else if (section == "labor")
+        {
+            laborDraft = new Labor();
+        }
+        else if (section == "materials")
+        {
+            materialDraft = new ProjectMaterial();
+        }
+        else if (section == "taxes")
+        {
+            taxDraft = new ConstructionCostEstimator.Models.Estimate();
+        }
+    }
+
+    private async Task HandleEquipmentSave(Equipment equipment)
+    {
+        if (activeProjectForDetails == null)
+            return;
+
+        equipment.ProjectId = activeProjectForDetails.Id;
+        await EquipmentService.AddEquipmentAsync(equipment);
+
+        equipmentDraft = new Equipment();
+        activeDetailSection = null;
         await LoadProjects();
     }
 
-    private void NavigateToCreate()
+    private async Task HandleLaborSave(Labor labor)
     {
-        Navigation.NavigateTo("/projects/create");
+        if (activeProjectForDetails == null)
+            return;
+
+        labor.ProjectId = activeProjectForDetails.Id;
+        await LaborService.AddLaborAsync(labor);
+
+        laborDraft = new Labor();
+        activeDetailSection = null;
+        await LoadProjects();
     }
 
-    private void NavigateToEdit(int projectId)
+    private async Task HandleMaterialSave(ProjectMaterial material)
     {
-        Navigation.NavigateTo($"/projects/edit/{projectId}");
+        if (activeProjectForDetails == null)
+            return;
+
+        material.ProjectId = activeProjectForDetails.Id;
+
+        var catalogMaterial = await Db.Materials.FindAsync(material.MaterialId);
+        if (catalogMaterial == null)
+        {
+            catalogMaterial = new Materials
+            {
+                Id = material.MaterialId,
+                Name = $"Material {material.MaterialId}",
+                Unit = "unit",
+                UnitPrice = material.UnitPrice
+            };
+
+            Db.Materials.Add(catalogMaterial);
+            await Db.SaveChangesAsync();
+        }
+
+        await MaterialService.AddMaterialAsync(material);
+
+        materialDraft = new ProjectMaterial();
+        activeDetailSection = null;
+        await LoadProjects();
+    }
+
+    private async Task HandleTaxSave(ConstructionCostEstimator.Models.Estimate estimate)
+    {
+        if (activeProjectForDetails == null)
+            return;
+
+        var existingEstimate = await Db.Estimates
+            .FirstOrDefaultAsync(e => e.ProjectId == activeProjectForDetails.Id);
+
+        if (existingEstimate == null)
+        {
+            existingEstimate = new ConstructionCostEstimator.Models.Estimate
+            {
+                ProjectId = activeProjectForDetails.Id
+            };
+
+            Db.Estimates.Add(existingEstimate);
+        }
+
+        existingEstimate.TaxAmount = estimate.TaxAmount;
+        existingEstimate.MaterialCost = 0;
+        existingEstimate.LaborCost = 0;
+        existingEstimate.EquipmentCost = 0;
+        existingEstimate.ProfitAmount = 0;
+        existingEstimate.TotalCost = estimate.TaxAmount;
+
+        await Db.SaveChangesAsync();
+
+        taxDraft = new ConstructionCostEstimator.Models.Estimate();
+        activeDetailSection = null;
+        await LoadProjects();
     }
 
     private void ShowDeleteConfirmation(Project project)
@@ -423,12 +633,6 @@
         confirmationText = "";
     }
 
-    private async Task DeleteProject(int id)
-    {
-        await ProjectService.DeleteProjectAsync(id);
-        await LoadProjects();
-    }
-
     private async Task DeleteProject()
     {
         if (selectedProject == null)
@@ -437,16 +641,7 @@
         if (confirmationText != "DELETE")
             return;
 
-        var project = await Db.Projects.FirstOrDefaultAsync(p =>
-            p.Id == selectedProject.Id &&
-            p.ApplicationUserId == selectedProject.ApplicationUserId);
-
-        if (project == null)
-            return;
-
-        Db.Projects.Remove(project);
-
-        await Db.SaveChangesAsync();
+        await ProjectService.DeleteProjectAsync(selectedProject.Id);
 
         await LoadProjects();
 

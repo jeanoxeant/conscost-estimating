@@ -14,34 +14,39 @@
     <ValidationSummary />
 
     <div class="mb-3">
-        <label>Project Name</label>
-        <InputText class="form-control" @bind-Value="ProjectModel.Name" />
+        <label class="form-label">Project Name <span class="text-danger">*</span></label>
+        <InputText class="form-control" @bind-Value="ProjectModel.Name" required />
+        <ValidationMessage For="@(() => ProjectModel.Name)" />
     </div>
 
     <div class="mb-3">
-        <label>Description</label>
-        <InputTextArea class="form-control" @bind-Value="ProjectModel.Description" />
+        <label class="form-label">Description <span class="text-danger">*</span></label>
+        <InputTextArea class="form-control" @bind-Value="ProjectModel.Description" required />
+        <ValidationMessage For="@(() => ProjectModel.Description)" />
     </div>
 
     <div class="mb-3">
-        <label>Estimated Cost</label>
-        <InputNumber class="form-control" @bind-Value="ProjectModel.EstimatedCost" />
+        <label class="form-label">Estimated Cost <span class="text-danger">*</span></label>
+        <InputNumber class="form-control" @bind-Value="ProjectModel.EstimatedCost" required />
+        <ValidationMessage For="@(() => ProjectModel.EstimatedCost)" />
     </div>
 
     <div class="mb-3">
-        <label>Start Date</label>
-        <InputDate class="form-control" @bind-Value="ProjectModel.StartDate" />
+        <label class="form-label">Start Date <span class="text-danger">*</span></label>
+        <InputDate class="form-control" @bind-Value="ProjectModel.StartDate" required />
+        <ValidationMessage For="@(() => ProjectModel.StartDate)" />
     </div>
 
     <div class="mb-3">
-        <label>End Date</label>
-        <InputDate class="form-control" @bind-Value="ProjectModel.EndDate" />
+        <label class="form-label">End Date <span class="text-danger">*</span></label>
+        <InputDate class="form-control" @bind-Value="ProjectModel.EndDate" required />
+        <ValidationMessage For="@(() => ProjectModel.EndDate)" />
     </div>
 
     <div class="mb-3">
-        <label>Status</label>
+        <label class="form-label">Status <span class="text-danger">*</span></label>
 
-        <InputSelect class="form-select" @bind-Value="ProjectModel.Status">
+        <InputSelect class="form-select" @bind-Value="ProjectModel.Status" required>
 
             @foreach (ProjectStatus status in Enum.GetValues<ProjectStatus>())
             {
