@@ -69,7 +69,7 @@
     decimal Overhead;
     decimal Profit;
     decimal GrandTotal;
-
+    decimal TaxPercentage = 7;
     bool loaded;
 
     protected override async Task OnInitializedAsync()
@@ -82,7 +82,14 @@
 
         Subtotal = MaterialTotal + LaborTotal + EquipmentTotal;
 
-        Tax = Subtotal * .07m;
+
+        //Tax = Subtotal * (TaxPercentage / 100);
+        Tax = EstimateService.CalculateTax(
+            MaterialTotal,
+            LaborTotal,
+            EquipmentTotal,
+            TaxPercentage
+        );
 
         Overhead = Subtotal * .10m;
 
