@@ -33,4 +33,26 @@ public class EstimateService
             .Where(x => x.ProjectId == projectId)
             .SumAsync(x => x.Days * x.DailyRate);
     }
+
+    public decimal CalculateTax(
+    decimal materialCost,
+    decimal laborCost,
+    decimal equipmentCost,
+    decimal taxPercentage)
+    {
+        // Calculates the project subtotal before applying taxes.
+        decimal subtotal =
+            materialCost +
+            laborCost +
+            equipmentCost;
+
+
+        // Converts percentage input into decimal format.
+        // Example: 7 becomes 0.07.
+        decimal taxRate = taxPercentage / 100;
+
+
+        // Returns the calculated tax amount.
+        return subtotal * taxRate;
+    }
 }

@@ -30,6 +30,10 @@ namespace ConstructionCostEstimator.Models
         [Range(0, double.MaxValue)]
         public decimal EquipmentCost { get; set; }
 
+        // Percentage of tax applied to the project subtotal.
+        [Range(0, 100, ErrorMessage = "Tax percentage must be between 0 and 100.")]
+        public decimal TaxPercentage { get; set; }
+
         // Total amount added for taxes.
         [Range(0, double.MaxValue)]
         public decimal TaxAmount { get; set; }
