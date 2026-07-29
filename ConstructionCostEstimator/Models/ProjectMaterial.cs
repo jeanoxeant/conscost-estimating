@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ConstructionCostEstimator.Models
 {
     public class ProjectMaterial
@@ -19,6 +21,13 @@ namespace ConstructionCostEstimator.Models
 
         // Price per unit at the time of the estimate
         public decimal UnitPrice { get; set; }
+
+        // Temporary form values used when creating or finding a catalog material.
+        [NotMapped]
+        public string Name { get; set; } = string.Empty;
+
+        [NotMapped]
+        public string Unit { get; set; } = string.Empty;
 
         // Total cost for this material in the project
         public decimal TotalCost => Quantity * UnitPrice;

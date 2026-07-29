@@ -24,6 +24,44 @@ public class MaterialService
 
     public async Task AddMaterialAsync(ProjectMaterial material)
     {
+        var materialName = string.IsNullOrWhiteSpace(material.Name)
+            ? "Material"
+            : material.Name.Trim();
+
+        var materialUnit = string.IsNullOrWhiteSpace(material.Unit)
+            ? "unit"
+            : material.Unit.Trim();
+
+        Materials? catalogMaterial = null;
+
+        if (material.MaterialId > 0)
+        {
+            catalogMaterial = await _context.Materials.FindAsync(material.MaterialId);
+        }
+
+        catalogMaterial ??= await _context.Materials
+            .FirstOrDefaultAsync(m => m.Name.ToLower() == materialName.ToLower()
+                && m.Unit.ToLower() == materialUnit.ToLower());
+
+        if (catalogMaterial == null)
+        {
+            catalogMaterial = new Materials
+            {
+                Name = materialName,
+                Unit = materialUnit,
+                UnitPrice = material.UnitPrice
+            };
+
+            _context.Materials.Add(catalogMaterial);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            catalogMaterial.UnitPrice = material.UnitPrice;
+            await _context.SaveChangesAsync();
+        }
+
+        material.MaterialId = catalogMaterial.Id;
         _context.ProjectMaterials.Add(material);
         await _context.SaveChangesAsync();
     }
