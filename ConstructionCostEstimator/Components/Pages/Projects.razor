@@ -567,21 +567,6 @@
 
         material.ProjectId = activeProjectForDetails.Id;
 
-        var catalogMaterial = await Db.Materials.FindAsync(material.MaterialId);
-        if (catalogMaterial == null)
-        {
-            catalogMaterial = new Materials
-            {
-                Id = material.MaterialId,
-                Name = $"Material {material.MaterialId}",
-                Unit = "unit",
-                UnitPrice = material.UnitPrice
-            };
-
-            Db.Materials.Add(catalogMaterial);
-            await Db.SaveChangesAsync();
-        }
-
         await MaterialService.AddMaterialAsync(material);
 
         materialDraft = new ProjectMaterial();

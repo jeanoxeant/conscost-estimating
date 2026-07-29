@@ -40,9 +40,9 @@
     {
         <tr>
 
-            <td>@item.Material?.Name</td>
+            <td>@(item.Material?.Name ?? item.Name)</td>
             <td>@item.Quantity</td>
-            <td>@item.Material?.Unit</td>
+            <td>@(item.Material?.Unit ?? item.Unit)</td>
             <td>@item.UnitPrice.ToString("C")</td>
             <td>@item.TotalCost.ToString("C")</td>
 
