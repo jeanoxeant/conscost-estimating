@@ -44,6 +44,9 @@ public class EquipmentService
         }
     }
 
+    // Sums Days * DailyRate for every piece of equipment attached to a project.
+    // Reused by the Projects page whenever the project's Estimate needs to be
+    // recalculated (after adding/removing equipment).
     public async Task<decimal> GetEquipmentTotalAsync(int projectId)
     {
         return await _context.Equipment

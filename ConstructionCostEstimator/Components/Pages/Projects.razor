@@ -1,4 +1,4 @@
-@page "/projects"
+@page "/projects" 
 @rendermode InteractiveServer
 
 @using ConstructionCostEstimator.Models
@@ -51,16 +51,7 @@
                     </p>
 
                 </div>
-<!--
-                <button class="btn btn-light text-primary fw-semibold mt-3 mt-lg-0"
-                        @onclick="NavigateToCreate">
 
-                    <i class="bi bi-plus-circle me-2"></i>
-
-                    Create Project
-
-                </button>
--->
             </div>
 
         </div>
@@ -307,7 +298,50 @@
             {
                 <div class="mt-4 border rounded p-3">
                     <h6 class="mb-3">Equipment</h6>
+
                     <EquipmentForm EquipmentModel="equipmentDraft" OnSave="HandleEquipmentSave" />
+
+                    @if (projectEquipmentList.Count > 0)
+                    {
+                        <table class="table table-sm table-striped mt-3">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Days</th>
+                                    <th>Daily Rate</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in projectEquipmentList)
+                                {
+                                    <tr>
+                                        <td>@item.Name</td>
+                                        <td>@item.Days</td>
+                                        <td>@item.DailyRate.ToString("C")</td>
+                                        <td>@item.TotalCost.ToString("C")</td>
+                                        <td>
+                                            <button class="btn btn-outline-danger btn-sm"
+                                                    @onclick="() => DeleteProjectEquipment(item.Id)">
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <div class="text-end fw-semibold">
+                            Equipment Total: @projectEquipmentTotal.ToString("C")
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mt-3 mb-0">
+                            No equipment added to this project yet.
+                        </p>
+                    }
                 </div>
             }
 
@@ -406,6 +440,11 @@
     private Labor laborDraft = new();
     private ProjectMaterial materialDraft = new();
     private ConstructionCostEstimator.Models.Estimate taxDraft = new();
+
+    // Equipment currently attached to the project whose details panel is open,
+    // plus the running Days * DailyRate total shown under the form.
+    private List<Equipment> projectEquipmentList = new();
+    private decimal projectEquipmentTotal;
 
     private int activeProjects =>
         projects.Count(p => p.Status == ProjectStatus.Active);
@@ -512,13 +551,18 @@
         StateHasChanged();
     }
 
-    private void SetActiveDetailSection(string? section)
+    private async void SetActiveDetailSection(string? section)
     {
         activeDetailSection = section;
 
         if (section == "equipment")
         {
             equipmentDraft = new Equipment();
+
+            if (activeProjectForDetails != null)
+            {
+                await LoadProjectEquipment(activeProjectForDetails.Id);
+            }
         }
         else if (section == "labor")
         {
@@ -532,6 +576,15 @@
         {
             taxDraft = new ConstructionCostEstimator.Models.Estimate();
         }
+
+        StateHasChanged();
+    }
+
+    // Loads the equipment list + running total for the equipment panel.
+    private async Task LoadProjectEquipment(int projectId)
+    {
+        projectEquipmentList = await EquipmentService.GetEquipmentAsync(projectId);
+        projectEquipmentTotal = await EquipmentService.GetEquipmentTotalAsync(projectId);
     }
 
     private async Task HandleEquipmentSave(Equipment equipment)
@@ -543,8 +596,55 @@
         await EquipmentService.AddEquipmentAsync(equipment);
 
         equipmentDraft = new Equipment();
-        activeDetailSection = null;
+
+        // Refresh the list/total and push the new equipment cost into the estimate.
+        await LoadProjectEquipment(activeProjectForDetails.Id);
+        await RecalculateEquipmentCostAsync(activeProjectForDetails.Id);
+
         await LoadProjects();
+    }
+
+    private async Task DeleteProjectEquipment(int id)
+    {
+        if (activeProjectForDetails == null)
+            return;
+
+        await EquipmentService.DeleteEquipmentAsync(id);
+
+        await LoadProjectEquipment(activeProjectForDetails.Id);
+        await RecalculateEquipmentCostAsync(activeProjectForDetails.Id);
+
+        await LoadProjects();
+    }
+
+    // Updates (or creates) the project's Estimate with the current equipment
+    // total, keeping whatever Material/Labor/Tax/Profit amounts are already
+    // stored, then recomputes TotalCost from all of those pieces.
+    private async Task RecalculateEquipmentCostAsync(int projectId)
+    {
+        var estimate = await Db.Estimates
+            .FirstOrDefaultAsync(e => e.ProjectId == projectId);
+
+        if (estimate == null)
+        {
+            estimate = new ConstructionCostEstimator.Models.Estimate
+            {
+                ProjectId = projectId
+            };
+
+            Db.Estimates.Add(estimate);
+        }
+
+        estimate.EquipmentCost = await EquipmentService.GetEquipmentTotalAsync(projectId);
+
+        estimate.TotalCost =
+            estimate.MaterialCost +
+            estimate.LaborCost +
+            estimate.EquipmentCost +
+            estimate.TaxAmount +
+            estimate.ProfitAmount;
+
+        await Db.SaveChangesAsync();
     }
 
     private async Task HandleLaborSave(Labor labor)
@@ -592,12 +692,18 @@
             Db.Estimates.Add(existingEstimate);
         }
 
+        // Only the tax amount changes here — Material/Labor/Equipment costs
+        // that were already calculated on this estimate are preserved instead
+        // of being reset to 0.
         existingEstimate.TaxAmount = estimate.TaxAmount;
-        existingEstimate.MaterialCost = 0;
-        existingEstimate.LaborCost = 0;
-        existingEstimate.EquipmentCost = 0;
-        existingEstimate.ProfitAmount = 0;
-        existingEstimate.TotalCost = estimate.TaxAmount;
+        existingEstimate.EquipmentCost = await EquipmentService.GetEquipmentTotalAsync(activeProjectForDetails.Id);
+
+        existingEstimate.TotalCost =
+            existingEstimate.MaterialCost +
+            existingEstimate.LaborCost +
+            existingEstimate.EquipmentCost +
+            existingEstimate.TaxAmount +
+            existingEstimate.ProfitAmount;
 
         await Db.SaveChangesAsync();
 
@@ -652,4 +758,3 @@
         _ => "status-planned"
     };
 }
-
