@@ -1,4 +1,4 @@
-@page "/labor"
+@page "/labor/{ProjectId:int}"
 @rendermode InteractiveServer
 
 @using ConstructionCostEstimator.Models
@@ -92,15 +92,23 @@
         labors = await LaborService.GetLaborAsync(ProjectId);
         total = await LaborService.GetLaborTotalAsync(ProjectId);
 
-        labor = new Labor
+        if (labor.Id == 0)
         {
-            ProjectId = ProjectId
-        };
+            labor = new Labor
+            {
+                ProjectId = ProjectId
+            };
+        }
     }
 
     private async Task SaveLabor(Labor laborItem)
-    {
-        Console.WriteLine($"ProjectId = {laborItem.ProjectId}");
+    {   
+        if (laborItem.ProjectId == 0)
+        {
+            Console.WriteLine("Cannot save Labor. ProjectId is missing.");
+            return;
+        }
+
         if (laborItem.Id == 0)
         {
             await LaborService.AddLaborAsync(laborItem);
