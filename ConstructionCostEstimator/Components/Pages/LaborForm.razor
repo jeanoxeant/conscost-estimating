@@ -13,31 +13,35 @@
             <label>Description</label>
             <InputText class="form-control"
                        @bind-Value="LaborModel.Description" />
+            <ValidationMessage For="@(() => LaborModel.Description)" />
         </div>
 
         <div class="col-md-2">
             <label>Workers</label>
             <InputNumber class="form-control"
                          @bind-Value="LaborModel.Workers" />
+            <ValidationMessage For="@(() => LaborModel.Workers)" />
         </div>
 
         <div class="col-md-2">
             <label>Hours</label>
             <InputNumber class="form-control"
                          @bind-Value="LaborModel.Hours" />
+            <ValidationMessage For="@(() => LaborModel.Hours)" />
         </div>
 
         <div class="col-md-2">
             <label>Hourly Rate</label>
             <InputNumber class="form-control"
                          @bind-Value="LaborModel.HourlyRate" />
+            <ValidationMessage For="@(() => LaborModel.HourlyRate)" />
         </div>
 
         <div class="col-md-2 d-grid">
 
             <label>&nbsp;</label>
 
-            <button class="btn btn-success">
+            <button class="btn btn-success" type="submit">
                 Save
             </button>
 
