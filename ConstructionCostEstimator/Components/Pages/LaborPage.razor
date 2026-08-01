@@ -1,11 +1,14 @@
-@page "/labor"
+@page "/labor/{ProjectId:int}"
+@rendermode InteractiveServer
 
 @using ConstructionCostEstimator.Models
 @using ConstructionCostEstimator.Services
 
 @inject LaborService LaborService
 
-<h3>Labor</h3>
+<h3>
+    @(labor.Id == 0 ? "Add Labor" : "Edit Labor")
+</h3>
 
 <LaborForm LaborModel="labor"
            OnSave="SaveLabor" />
@@ -46,6 +49,10 @@
             <td>@item.TotalCost.ToString("C")</td>
 
             <td>
+                <button class="btn btn-warning btn-sm me-2" 
+                        @onclick="() => EditLabor(item)">
+                    Edit
+                </button>
 
                 <button class="btn btn-danger btn-sm"
                         @onclick="() => Delete(item.Id)">
@@ -85,15 +92,32 @@
         labors = await LaborService.GetLaborAsync(ProjectId);
         total = await LaborService.GetLaborTotalAsync(ProjectId);
 
-        labor = new Labor
+        if (labor.Id == 0)
         {
-            ProjectId = ProjectId
-        };
+            labor = new Labor
+            {
+                ProjectId = ProjectId
+            };
+        }
     }
 
     private async Task SaveLabor(Labor laborItem)
-    {
-        await LaborService.AddLaborAsync(laborItem);
+    {   
+        if (laborItem.ProjectId == 0)
+        {
+            Console.WriteLine("Cannot save Labor. ProjectId is missing.");
+            return;
+        }
+
+        if (laborItem.Id == 0)
+        {
+            await LaborService.AddLaborAsync(laborItem);
+        }
+        else
+        {
+            await LaborService.UpdateLaborAsync(laborItem);
+        }
+
         await Load();
     }
 
@@ -101,5 +125,18 @@
     {
         await LaborService.DeleteLaborAsync(id);
         await Load();
+    }
+
+    private void EditLabor(Labor selectedLabor)
+    {
+        labor = new Labor
+        {
+            Id = selectedLabor.Id,
+            ProjectId = selectedLabor.ProjectId,
+            Description = selectedLabor.Description,
+            Workers = selectedLabor.Workers,
+            Hours = selectedLabor.Hours,
+            HourlyRate = selectedLabor.HourlyRate
+        };
     }
 }
