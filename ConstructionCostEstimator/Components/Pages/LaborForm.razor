@@ -42,7 +42,7 @@
             <label>&nbsp;</label>
 
             <button class="btn btn-success" type="submit">
-                Save
+                @(LaborModel.Id == 0 ? "Add Labor" : "Save Changes")
             </button>
 
         </div>
