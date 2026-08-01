@@ -1,7 +1,7 @@
 @using ConstructionCostEstimator.Models
 @using ConstructionCostEstimator.Services
 
-<EditForm Model="LaborModel" OnValidSubmit="Save">
+<EditForm Model="LaborModel" OnValidSubmit="Save" FormName="LaborForm">
 
     <DataAnnotationsValidator />
 
@@ -9,32 +9,32 @@
 
     <div class="row">
 
-        <div class="col-md-3">
-            <label>Description</label>
+        <div class="col-md-3 mb-3">
+            <label class="form-label">Description</label>
             <InputText class="form-control"
                        @bind-Value="LaborModel.Description" />
-            <ValidationMessage For="@(() => LaborModel.Description)" />
+            <ValidationMessage For="@(() => LaborModel.Description)" class="text-danger" />
         </div>
 
         <div class="col-md-2">
-            <label>Workers</label>
+            <label class="form-label">Workers</label>
             <InputNumber class="form-control"
                          @bind-Value="LaborModel.Workers" />
-            <ValidationMessage For="@(() => LaborModel.Workers)" />
+            <ValidationMessage For="@(() => LaborModel.Workers)" class="text-danger" />
         </div>
 
         <div class="col-md-2">
-            <label>Hours</label>
+            <label class="form-label">Hours</label>
             <InputNumber class="form-control"
                          @bind-Value="LaborModel.Hours" />
-            <ValidationMessage For="@(() => LaborModel.Hours)" />
+            <ValidationMessage For="@(() => LaborModel.Hours)" class="text-danger" />
         </div>
 
         <div class="col-md-2">
-            <label>Hourly Rate</label>
+            <label class="form-label">Hourly Rate</label>
             <InputNumber class="form-control"
                          @bind-Value="LaborModel.HourlyRate" />
-            <ValidationMessage For="@(() => LaborModel.HourlyRate)" />
+            <ValidationMessage For="@(() => LaborModel.HourlyRate)" class="text-danger" />
         </div>
 
         <div class="col-md-2 d-grid">

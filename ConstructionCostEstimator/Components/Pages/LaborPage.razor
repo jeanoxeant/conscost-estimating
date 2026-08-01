@@ -1,4 +1,5 @@
 @page "/labor"
+@rendermode InteractiveServer
 
 @using ConstructionCostEstimator.Models
 @using ConstructionCostEstimator.Services
@@ -99,6 +100,7 @@
 
     private async Task SaveLabor(Labor laborItem)
     {
+        Console.WriteLine($"ProjectId = {laborItem.ProjectId}");
         if (laborItem.Id == 0)
         {
             await LaborService.AddLaborAsync(laborItem);
