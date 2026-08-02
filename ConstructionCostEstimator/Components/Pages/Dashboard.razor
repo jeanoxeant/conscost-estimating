@@ -1,0 +1,139 @@
+@page "/dashboard"
+
+@using ConstructionCostEstimator.Models
+@using ConstructionCostEstimator.Services
+
+@inject ProjectService ProjectService
+
+<PageTitle>Dashboard</PageTitle>
+
+<h3 class="mb-4">Construction Cost Estimator Dashboard</h3>
+
+@if (loading)
+{
+    <p><em>Loading dashboard...</em></p>
+}
+else
+{
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card text-center shadow">
+                <div class="card-body">
+                    <h5>Total Projects</h5>
+                    <h2>@TotalProjects</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow">
+                <div class="card-body">
+                    <h5>Total Estimated Cost</h5>
+                    <h2>@TotalEstimatedCost.ToString("C")</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow">
+                <div class="card-body">
+                    <h5>Active Projects</h5>
+                    <h2>@ActiveProjects</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow">
+                <div class="card-body">
+                    <h5>Completed Projects</h5>
+                    <h2>@CompletedProjects</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow">
+
+        <div class="card-header">
+            <strong>Recent Projects</strong>
+        </div>
+
+        <div class="card-body">
+
+            @if (Projects.Count == 0)
+            {
+                <p>No projects found.</p>
+            }
+            else
+            {
+                <table class="table table-striped">
+
+                    <thead>
+
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Estimated Cost</th>
+                            <th>Start</th>
+                            <th>End</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var project in Projects)
+                        {
+                            <tr>
+                                <td>@project.Name</td>
+                                <td>@project.Description</td>
+                                <td>@project.Status</td>
+                                <td>@project.EstimatedCost.ToString("C")</td>
+                                <td>@project.StartDate?.ToShortDateString()</td>
+                                <td>@project.EndDate?.ToShortDateString()</td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+            }
+
+        </div>
+
+    </div>
+}
+
+@code
+{
+    private bool loading = true;
+
+    private List<Project> Projects = new();
+
+    private int TotalProjects;
+
+    private int ActiveProjects;
+
+    private int CompletedProjects;
+
+    private decimal TotalEstimatedCost;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Projects = await ProjectService.GetProjectsAsync();
+
+        TotalProjects = Projects.Count;
+
+        TotalEstimatedCost = Projects.Sum(p => p.EstimatedCost);
+
+        ActiveProjects = Projects.Count(p => p.Status == ProjectStatus.Active);
+
+        CompletedProjects = Projects.Count(p => p.Status == ProjectStatus.Completed);
+
+        loading = false;
+    }
+}
