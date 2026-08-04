@@ -19,10 +19,6 @@ namespace ConstructionCostEstimator.Models
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters.")]
         public string Description { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Estimated cost is required.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Estimated cost must be greater than zero.")]
-        public decimal EstimatedCost { get; set; }
-
         [Required(ErrorMessage = "Start date is required.")]
         public DateTime? StartDate { get; set; }
 
