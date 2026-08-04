@@ -17,6 +17,7 @@
 @inject EquipmentService EquipmentService
 @inject LaborService LaborService
 @inject MaterialService MaterialService
+@inject EstimateService EstimateService
 
 <PageTitle>Projects</PageTitle>
 
@@ -201,11 +202,11 @@
                                     <div class="col-6">
 
                                         <small class="text-muted">
-                                            Estimated Cost
+                                            Status
                                         </small>
 
                                         <h5>
-                                            @project.EstimatedCost.ToString("C")
+                                            @project.Status
                                         </h5>
 
                                     </div>
@@ -225,6 +226,18 @@
                                         </h5>
 
                                     </div>
+
+                                </div>
+
+                                <div class="mt-3">
+
+                                    <small class="text-muted">
+                                        Estimated Cost
+                                    </small>
+
+                                    <h5>
+                                        @GetProjectEstimate(project)
+                                    </h5>
 
                                 </div>
 
@@ -470,6 +483,9 @@
 
         projects = await Db.Projects
             .Where(p => p.ApplicationUserId == user.Id)
+            .Include(p => p.ProjectMaterials)
+            .Include(p => p.ProjectLabors)
+            .Include(p => p.ProjectEquipments)
             .OrderBy(p => p.Name)
             .ToListAsync();
     }
@@ -490,7 +506,6 @@
             Id = project.Id,
             Name = project.Name,
             Description = project.Description,
-            EstimatedCost = project.EstimatedCost,
             StartDate = project.StartDate,
             EndDate = project.EndDate,
             Status = project.Status,
@@ -551,7 +566,7 @@
         StateHasChanged();
     }
 
-    private async void SetActiveDetailSection(string? section)
+    private async Task SetActiveDetailSection(string? section)
     {
         activeDetailSection = section;
 
@@ -589,39 +604,44 @@
 
     private async Task HandleEquipmentSave(Equipment equipment)
     {
-        if (activeProjectForDetails == null)
+        if (activeProjectForDetails == null || activeProjectForDetails.Id == 0)
+        {
             return;
+        }
 
         equipment.ProjectId = activeProjectForDetails.Id;
+        equipment.Name = string.IsNullOrWhiteSpace(equipment.Name) ? "Equipment" : equipment.Name.Trim();
+        equipment.Days = equipment.Days <= 0 ? 1 : equipment.Days;
+        equipment.DailyRate = equipment.DailyRate < 0 ? 0 : equipment.DailyRate;
+
         await EquipmentService.AddEquipmentAsync(equipment);
 
         equipmentDraft = new Equipment();
 
-        // Refresh the list/total and push the new equipment cost into the estimate.
         await LoadProjectEquipment(activeProjectForDetails.Id);
-        await RecalculateEquipmentCostAsync(activeProjectForDetails.Id);
+        await UpdateProjectEstimateAsync(activeProjectForDetails.Id);
 
         await LoadProjects();
     }
 
     private async Task DeleteProjectEquipment(int id)
     {
-        if (activeProjectForDetails == null)
+        if (activeProjectForDetails == null || activeProjectForDetails.Id == 0)
             return;
 
         await EquipmentService.DeleteEquipmentAsync(id);
 
         await LoadProjectEquipment(activeProjectForDetails.Id);
-        await RecalculateEquipmentCostAsync(activeProjectForDetails.Id);
+        await UpdateProjectEstimateAsync(activeProjectForDetails.Id);
 
         await LoadProjects();
     }
 
-    // Updates (or creates) the project's Estimate with the current equipment
-    // total, keeping whatever Material/Labor/Tax/Profit amounts are already
-    // stored, then recomputes TotalCost from all of those pieces.
-    private async Task RecalculateEquipmentCostAsync(int projectId)
+    private async Task UpdateProjectEstimateAsync(int projectId)
     {
+        if (projectId <= 0)
+            return;
+
         var estimate = await Db.Estimates
             .FirstOrDefaultAsync(e => e.ProjectId == projectId);
 
@@ -635,7 +655,27 @@
             Db.Estimates.Add(estimate);
         }
 
-        estimate.EquipmentCost = await EquipmentService.GetEquipmentTotalAsync(projectId);
+        var materialCost = await Db.ProjectMaterials
+            .Where(pm => pm.ProjectId == projectId)
+            .SumAsync(pm => pm.Quantity * pm.UnitPrice);
+
+        var laborCost = await Db.Labor
+            .Where(l => l.ProjectId == projectId)
+            .SumAsync(l => l.Workers * l.Hours * l.HourlyRate);
+
+        var equipmentCost = await Db.Equipment
+            .Where(e => e.ProjectId == projectId)
+            .SumAsync(e => e.Days * e.DailyRate);
+
+        estimate.MaterialCost = materialCost;
+        estimate.LaborCost = laborCost;
+        estimate.EquipmentCost = equipmentCost;
+
+        estimate.TaxAmount = EstimateService.CalculateTax(
+            estimate.MaterialCost,
+            estimate.LaborCost,
+            estimate.EquipmentCost,
+            estimate.TaxPercentage);
 
         estimate.TotalCost =
             estimate.MaterialCost +
@@ -657,6 +697,7 @@
 
         laborDraft = new Labor();
         activeDetailSection = null;
+        await UpdateProjectEstimateAsync(activeProjectForDetails.Id);
         await LoadProjects();
     }
 
@@ -671,6 +712,7 @@
 
         materialDraft = new ProjectMaterial();
         activeDetailSection = null;
+        await UpdateProjectEstimateAsync(activeProjectForDetails.Id);
         await LoadProjects();
     }
 
@@ -692,11 +734,19 @@
             Db.Estimates.Add(existingEstimate);
         }
 
-        // Only the tax amount changes here — Material/Labor/Equipment costs
-        // that were already calculated on this estimate are preserved instead
-        // of being reset to 0.
-        existingEstimate.TaxAmount = estimate.TaxAmount;
+        existingEstimate.TaxPercentage = estimate.TaxPercentage;
+        existingEstimate.TaxAmount = EstimateService.CalculateTax(
+            existingEstimate.MaterialCost,
+            existingEstimate.LaborCost,
+            existingEstimate.EquipmentCost,
+            existingEstimate.TaxPercentage);
         existingEstimate.EquipmentCost = await EquipmentService.GetEquipmentTotalAsync(activeProjectForDetails.Id);
+
+        existingEstimate.TaxAmount = EstimateService.CalculateTax(
+            existingEstimate.MaterialCost,
+            existingEstimate.LaborCost,
+            existingEstimate.EquipmentCost,
+            existingEstimate.TaxPercentage);
 
         existingEstimate.TotalCost =
             existingEstimate.MaterialCost +
@@ -738,6 +788,22 @@
 
         selectedProject = null;
         confirmationText = "";
+    }
+
+    private string GetProjectEstimate(Project project)
+    {
+        var estimateValue = GetProjectEstimateValue(project);
+        return estimateValue.ToString("C");
+    }
+
+    private decimal GetProjectEstimateValue(Project project)
+    {
+        var materialCost = project.ProjectMaterials.Sum(m => m.TotalCost);
+        var laborCost = project.ProjectLabors.Sum(l => l.RatePerHour * l.Hours);
+        var equipmentCost = Db.Equipment
+            .Where(e => e.ProjectId == project.Id)
+            .Sum(e => e.Days * e.DailyRate);
+        return materialCost + laborCost + equipmentCost;
     }
 
     private string GetStatusBadgeClass(ProjectStatus status) => status switch

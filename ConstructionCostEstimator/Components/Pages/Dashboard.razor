@@ -1,9 +1,18 @@
 @page "/dashboard"
+@rendermode InteractiveServer
 
+@using ConstructionCostEstimator.Data
 @using ConstructionCostEstimator.Models
 @using ConstructionCostEstimator.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 
 @inject ProjectService ProjectService
+@inject ApplicationDbContext Db
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -92,7 +101,7 @@ else
                                 <td>@project.Name</td>
                                 <td>@project.Description</td>
                                 <td>@project.Status</td>
-                                <td>@project.EstimatedCost.ToString("C")</td>
+                                <td>@GetProjectEstimate(project)</td>
                                 <td>@project.StartDate?.ToShortDateString()</td>
                                 <td>@project.EndDate?.ToShortDateString()</td>
                             </tr>
@@ -124,16 +133,51 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Projects = await ProjectService.GetProjectsAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user is null)
+        {
+            Navigation.NavigateTo("/Account/Login", forceLoad: true);
+            loading = false;
+            return;
+        }
+
+        Projects = await Db.Projects
+            .Where(p => p.ApplicationUserId == user.Id)
+            .Include(p => p.ProjectMaterials)
+            .Include(p => p.ProjectLabors)
+            .OrderByDescending(p => p.StartDate)
+            .ToListAsync();
 
         TotalProjects = Projects.Count;
 
-        TotalEstimatedCost = Projects.Sum(p => p.EstimatedCost);
+        decimal totalEstimatedCost = 0;
+        foreach (var project in Projects)
+        {
+            totalEstimatedCost += GetProjectEstimateValue(project);
+        }
 
+        TotalEstimatedCost = totalEstimatedCost;
         ActiveProjects = Projects.Count(p => p.Status == ProjectStatus.Active);
-
         CompletedProjects = Projects.Count(p => p.Status == ProjectStatus.Completed);
 
         loading = false;
+    }
+
+    private string GetProjectEstimate(Project project)
+    {
+        var estimateValue = GetProjectEstimateValue(project);
+        return estimateValue.ToString("C");
+    }
+
+    private decimal GetProjectEstimateValue(Project project)
+    {
+        var materialCost = project.ProjectMaterials.Sum(m => m.TotalCost);
+        var laborCost = project.ProjectLabors.Sum(l => l.RatePerHour * l.Hours);
+        var equipmentCost = Db.Equipment
+            .Where(e => e.ProjectId == project.Id)
+            .Sum(e => e.Days * e.DailyRate);
+        return materialCost + laborCost + equipmentCost;
     }
 }
