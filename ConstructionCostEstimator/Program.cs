@@ -23,16 +23,18 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 
-    builder.Services.AddScoped<LaborService>();
-    builder.Services.AddScoped<EquipmentService>();
-    builder.Services.AddScoped<MaterialService>();
-    builder.Services.AddScoped<ProjectService>();
-    builder.Services.AddScoped<EstimateService>();
-
+// Application services
+builder.Services.AddScoped<LaborService>();
+builder.Services.AddScoped<EquipmentService>();
+builder.Services.AddScoped<MaterialService>();
+builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<EstimateService>();
+builder.Services.AddScoped<ReportService>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
