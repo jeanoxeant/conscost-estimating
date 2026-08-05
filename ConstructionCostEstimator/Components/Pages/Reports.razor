@@ -1,0 +1,136 @@
+@page "/reports"
+@using ConstructionCostEstimator.Models
+@using ConstructionCostEstimator.Services
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@attribute [Authorize]
+@inject ReportService ReportService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Reports</PageTitle>
+
+<h3>Project Cost Reports</h3>
+
+@if (reports == null)
+{
+    <p><em>Loading reports...</em></p>
+}
+else if (!reports.Any())
+{
+    <p>No projects found. Create a project to see cost reports here.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Project</th>
+                <th>Status</th>
+                <th>Materials</th>
+                <th>Labor</th>
+                <th>Equipment</th>
+                <th>Total Cost</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var report in reports)
+            {
+                <tr>
+                    <td>@report.ProjectName</td>
+                    <td>@report.Status</td>
+                    <td>@report.TotalMaterialCost.ToString("C")</td>
+                    <td>@report.TotalLaborCost.ToString("C")</td>
+                    <td>@report.TotalEquipmentCost.ToString("C")</td>
+                    <td><strong>@report.TotalCost.ToString("C")</strong></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" @onclick="() => ViewDetails(report.ProjectId)">
+                            View Details
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="5" class="text-end">Grand Total</th>
+                <th>@reports.Sum(r => r.TotalCost).ToString("C")</th>
+                <th></th>
+            </tr>
+        </tfoot>
+    </table>
+}
+
+@if (selectedReport != null)
+{
+    <hr />
+    <h4>@selectedReport.ProjectName - Detailed Breakdown</h4>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h5>Materials</h5>
+            <ul class="list-group">
+                @foreach (var item in selectedReport.MaterialBreakdown)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@item.Name (@item.Quantity)</span>
+                        <span>@item.Total.ToString("C")</span>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <h5>Labor</h5>
+            <ul class="list-group">
+                @foreach (var item in selectedReport.LaborBreakdown)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@item.Name (@item.Quantity)</span>
+                        <span>@item.Total.ToString("C")</span>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <h5>Equipment</h5>
+            <ul class="list-group">
+                @foreach (var item in selectedReport.EquipmentBreakdown)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@item.Name (@item.Quantity)</span>
+                        <span>@item.Total.ToString("C")</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ProjectReport>? reports;
+    private ProjectReport? selectedReport;
+    private string? currentUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        currentUserId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!string.IsNullOrEmpty(currentUserId))
+        {
+            reports = await ReportService.GetProjectReportsAsync(currentUserId);
+        }
+        else
+        {
+            reports = new List<ProjectReport>();
+        }
+    }
+
+    private async Task ViewDetails(int projectId)
+    {
+        if (currentUserId != null)
+        {
+            selectedReport = await ReportService.GetProjectReportAsync(projectId, currentUserId);
+        }
+    }
+}
