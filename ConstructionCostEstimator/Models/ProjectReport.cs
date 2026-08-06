@@ -17,8 +17,11 @@ namespace ConstructionCostEstimator.Models
         public decimal TotalMaterialCost { get; set; }
         public decimal TotalLaborCost { get; set; }
         public decimal TotalEquipmentCost { get; set; }
+        public decimal TaxPercentage { get; set; }
+        public decimal TaxAmount { get; set; }
 
-        public decimal TotalCost => TotalMaterialCost + TotalLaborCost + TotalEquipmentCost;
+        public decimal Subtotal => TotalMaterialCost + TotalLaborCost + TotalEquipmentCost;
+        public decimal TotalCost => Subtotal + TaxAmount;
 
         public int MaterialItemCount { get; set; }
         public int LaborItemCount { get; set; }
@@ -34,6 +37,7 @@ namespace ConstructionCostEstimator.Models
         public string Name { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public decimal UnitCost { get; set; }
+        public string Unit { get; set; } = string.Empty;
         public decimal Total => Quantity * UnitCost;
     }
 }

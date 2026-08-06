@@ -9,128 +9,550 @@
 
 <PageTitle>Reports</PageTitle>
 
-<h3>Project Cost Reports</h3>
+<style>
+    .report-hero {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: center;
+        backdrop-filter: blur(4px);
+    }
+    .stat-card .stat-value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.78rem;
+        opacity: 0.75;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.25rem;
+    }
+    .project-card {
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 1.75rem;
+        transition: box-shadow 0.2s;
+    }
+    .project-card:hover {
+        box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+    }
+    .project-card .card-header {
+        background: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+        padding: 1.1rem 1.5rem;
+    }
+    .project-card .card-body {
+        padding: 1.5rem;
+    }
+    .project-card .card-footer {
+        background: #f8f9fa;
+        border-top: 2px solid #e9ecef;
+        padding: 0.9rem 1.5rem;
+    }
+    .cost-bar-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 0.2rem;
+    }
+    .cost-segment {
+        height: 10px;
+        border-radius: 6px;
+    }
+    .breakdown-table th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6c757d;
+        border-bottom: 2px solid #dee2e6;
+        padding: 0.5rem 0.75rem;
+    }
+    .breakdown-table td {
+        padding: 0.55rem 0.75rem;
+        vertical-align: middle;
+        font-size: 0.88rem;
+    }
+    .breakdown-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .section-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+    }
+    .section-materials { background: #fff3cd; color: #856404; }
+    .section-labor     { background: #cff4fc; color: #055160; }
+    .section-equipment { background: #d1e7dd; color: #0a3622; }
+    .section-tax       { background: #ffe5d0; color: #7d3c00; }
+    .tax-summary-row {
+        background: #fff8f0;
+        border: 1px solid #fde8cc;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+    }
+    .tax-summary-row .tax-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        padding: 0.25rem 0;
+    }
+    .tax-summary-row .tax-line + .tax-line {
+        border-top: 1px solid #fde8cc;
+    }
+    .tax-total-line {
+        font-weight: 700;
+        font-size: 1rem !important;
+        border-top: 2px solid #fd7e14 !important;
+        margin-top: 0.25rem;
+        padding-top: 0.5rem !important;
+        color: #7d3c00;
+    }
+    .badge-status-Planned   { background-color: #6c757d; }
+    .badge-status-Active    { background-color: #0d6efd; }
+    .badge-status-Completed { background-color: #198754; }
+    .badge-status-OnHold    { background-color: #ffc107; color: #212529 !important; }
+    .badge-status-Cancelled { background-color: #dc3545; }
+    .project-total-pill {
+        font-size: 1.05rem;
+        font-weight: 700;
+        background: #0f3460;
+        color: white;
+        border-radius: 999px;
+        padding: 0.3rem 1.1rem;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 5rem 1rem;
+        color: #6c757d;
+    }
+    .empty-state svg {
+        opacity: 0.25;
+        margin-bottom: 1.5rem;
+    }
+    .duration-badge {
+        font-size: 0.78rem;
+        background: #e9ecef;
+        color: #495057;
+        border-radius: 999px;
+        padding: 0.2rem 0.7rem;
+    }
+</style>
+
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+        <h3 class="mb-0 fw-bold">Project Cost Reports</h3>
+        @if (reports != null)
+        {
+            <span class="badge bg-secondary rounded-pill">@reports.Count project@(reports.Count == 1 ? "" : "s")</span>
+        }
+    </div>
+    @* TODO: implement PDF generation *@
+    <button class="btn btn-outline-danger" disabled title="Coming soon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-1" viewBox="0 0 16 16">
+            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+        </svg>
+        Download as PDF
+    </button>
+</div>
 
 @if (reports == null)
 {
-    <p><em>Loading reports...</em></p>
+    <div class="d-flex align-items-center gap-3 p-4">
+        <div class="spinner-border text-primary" role="status"></div>
+        <span class="text-muted">Loading your project reports&hellip;</span>
+    </div>
 }
 else if (!reports.Any())
 {
-    <p>No projects found. Create a project to see cost reports here.</p>
+    <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M4 0h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm0 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4z"/>
+            <path d="M4.5 12.5A.5.5 0 0 1 5 12h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 10h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 8h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"/>
+        </svg>
+        <h5 class="fw-semibold">No Projects Yet</h5>
+        <p class="mb-0">Create a project and add costs to see a full report here.</p>
+    </div>
 }
 else
 {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Project</th>
-                <th>Status</th>
-                <th>Materials</th>
-                <th>Labor</th>
-                <th>Equipment</th>
-                <th>Total Cost</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var report in reports)
+    @* ── Hero summary banner ── *@
+    <div class="report-hero">
+        <div class="row g-3">
+            <div class="col-6 col-md-4 col-lg">
+                <div class="stat-card">
+                    <div class="stat-value">@reports.Sum(r => r.TotalCost).ToString("C0")</div>
+                    <div class="stat-label">Grand Total (inc. Tax)</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg">
+                <div class="stat-card">
+                    <div class="stat-value">@reports.Sum(r => r.TotalMaterialCost).ToString("C0")</div>
+                    <div class="stat-label">Total Materials</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg">
+                <div class="stat-card">
+                    <div class="stat-value">@reports.Sum(r => r.TotalLaborCost).ToString("C0")</div>
+                    <div class="stat-label">Total Labor</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg">
+                <div class="stat-card">
+                    <div class="stat-value">@reports.Sum(r => r.TotalEquipmentCost).ToString("C0")</div>
+                    <div class="stat-label">Total Equipment</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg">
+                <div class="stat-card" style="border-color:rgba(255,193,7,0.5);">
+                    <div class="stat-value" style="color:#ffc107;">@reports.Sum(r => r.TaxAmount).ToString("C0")</div>
+                    <div class="stat-label">Total Taxes</div>
+                </div>
+            </div>
+        </div>
+
+        @* Portfolio-wide cost distribution bar *@
+        @{
+            decimal grandTotal   = reports.Sum(r => r.TotalCost);
+            decimal allMaterials = reports.Sum(r => r.TotalMaterialCost);
+            decimal allLabor     = reports.Sum(r => r.TotalLaborCost);
+            decimal allEquip     = reports.Sum(r => r.TotalEquipmentCost);
+            decimal allTax       = reports.Sum(r => r.TaxAmount);
+            double matPct  = grandTotal > 0 ? (double)(allMaterials / grandTotal * 100) : 0;
+            double labPct  = grandTotal > 0 ? (double)(allLabor     / grandTotal * 100) : 0;
+            double eqpPct  = grandTotal > 0 ? (double)(allEquip     / grandTotal * 100) : 0;
+            double taxPct  = grandTotal > 0 ? (double)(allTax       / grandTotal * 100) : 0;
+        }
+        @if (grandTotal > 0)
+        {
+            <div class="mt-3">
+                <div class="d-flex justify-content-between mb-1" style="font-size:0.78rem; opacity:0.8;">
+                    <span>&#9632; Materials @matPct.ToString("F1")%</span>
+                    <span>&#9632; Labor @labPct.ToString("F1")%</span>
+                    <span>&#9632; Equipment @eqpPct.ToString("F1")%</span>
+                    @if (taxPct > 0) { <span>&#9632; Tax @taxPct.ToString("F1")%</span> }
+                </div>
+                <div class="d-flex rounded-3 overflow-hidden" style="height:10px;">
+                    <div style="width:@(matPct.ToString("F2"))%; background:#ffc107;"></div>
+                    <div style="width:@(labPct.ToString("F2"))%; background:#0dcaf0;"></div>
+                    <div style="width:@(eqpPct.ToString("F2"))%; background:#20c997;"></div>
+                    @if (taxPct > 0) { <div style="width:@(taxPct.ToString("F2"))%; background:#fd7e14;"></div> }
+                </div>
+                <div class="d-flex gap-3 mt-1" style="font-size:0.75rem; opacity:0.7;">
+                    <span><span style="color:#ffc107;">&#9632;</span> Mat</span>
+                    <span><span style="color:#0dcaf0;">&#9632;</span> Labor</span>
+                    <span><span style="color:#20c997;">&#9632;</span> Equip</span>
+                    @if (taxPct > 0) { <span><span style="color:#fd7e14;">&#9632;</span> Tax</span> }
+                </div>
+            </div>
+        }
+
+        @* Status distribution *@
+        <div class="mt-3 d-flex flex-wrap gap-2" style="font-size:0.8rem; opacity:0.85;">
+            @foreach (var grp in reports.GroupBy(r => r.Status).OrderBy(g => g.Key.ToString()))
             {
-                <tr>
-                    <td>@report.ProjectName</td>
-                    <td>@report.Status</td>
-                    <td>@report.TotalMaterialCost.ToString("C")</td>
-                    <td>@report.TotalLaborCost.ToString("C")</td>
-                    <td>@report.TotalEquipmentCost.ToString("C")</td>
-                    <td><strong>@report.TotalCost.ToString("C")</strong></td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" @onclick="() => ViewDetails(report.ProjectId)">
-                            View Details
-                        </button>
-                    </td>
-                </tr>
+                <span class="badge badge-status-@grp.Key rounded-pill px-3 py-2">
+                    @grp.Key &mdash; @grp.Count()
+                </span>
             }
-        </tbody>
-        <tfoot>
-            <tr>
-                <th colspan="5" class="text-end">Grand Total</th>
-                <th>@reports.Sum(r => r.TotalCost).ToString("C")</th>
-                <th></th>
-            </tr>
-        </tfoot>
-    </table>
-}
-
-@if (selectedReport != null)
-{
-    <hr />
-    <h4>@selectedReport.ProjectName - Detailed Breakdown</h4>
-
-    <div class="row">
-        <div class="col-md-4">
-            <h5>Materials</h5>
-            <ul class="list-group">
-                @foreach (var item in selectedReport.MaterialBreakdown)
-                {
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>@item.Name (@item.Quantity)</span>
-                        <span>@item.Total.ToString("C")</span>
-                    </li>
-                }
-            </ul>
-        </div>
-        <div class="col-md-4">
-            <h5>Labor</h5>
-            <ul class="list-group">
-                @foreach (var item in selectedReport.LaborBreakdown)
-                {
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>@item.Name (@item.Quantity)</span>
-                        <span>@item.Total.ToString("C")</span>
-                    </li>
-                }
-            </ul>
-        </div>
-        <div class="col-md-4">
-            <h5>Equipment</h5>
-            <ul class="list-group">
-                @foreach (var item in selectedReport.EquipmentBreakdown)
-                {
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>@item.Name (@item.Quantity)</span>
-                        <span>@item.Total.ToString("C")</span>
-                    </li>
-                }
-            </ul>
         </div>
     </div>
+
+    @* ── Per-project cards ── *@
+    @foreach (var report in reports.OrderByDescending(r => r.TotalCost))
+    {
+        decimal projTotal = report.TotalCost;
+        double pMat = projTotal > 0 ? (double)(report.TotalMaterialCost / projTotal * 100) : 0;
+        double pLab = projTotal > 0 ? (double)(report.TotalLaborCost     / projTotal * 100) : 0;
+        double pEqp = projTotal > 0 ? (double)(report.TotalEquipmentCost / projTotal * 100) : 0;
+        int? durationDays = (report.StartDate.HasValue && report.EndDate.HasValue)
+            ? (int)(report.EndDate.Value - report.StartDate.Value).TotalDays
+            : null;
+        int totalItems = report.MaterialItemCount + report.LaborItemCount + report.EquipmentItemCount;
+        <div class="project-card card">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-start gap-2">
+                <div>
+                    <h5 class="mb-1 fw-bold">@report.ProjectName</h5>
+                    <p class="mb-0 text-muted small" style="max-width:520px;">@report.Description</p>
+                </div>
+                <div class="d-flex flex-column align-items-end gap-1">
+                    <span class="badge badge-status-@report.Status text-white rounded-pill px-3">@report.Status</span>
+                    <span class="text-muted small">
+                        @(report.StartDate?.ToString("MMM d, yyyy") ?? "—")
+                        &rarr;
+                        @(report.EndDate?.ToString("MMM d, yyyy") ?? "—")
+                    </span>
+                    @if (durationDays.HasValue)
+                    {
+                        <span class="duration-badge">@durationDays day@(durationDays == 1 ? "" : "s")</span>
+                    }
+                </div>
+            </div>
+
+            <div class="card-body">
+                @* Cost overview row *@
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-lg-3">
+                        <div class="p-3 rounded-3 text-center" style="background:#fff3cd;">
+                            <div class="fw-bold fs-5">@report.TotalMaterialCost.ToString("C")</div>
+                            <div style="font-size:0.75rem; color:#856404; text-transform:uppercase; letter-spacing:.05em;">Materials</div>
+                            <div style="font-size:0.72rem; color:#856404;">@report.MaterialItemCount item@(report.MaterialItemCount == 1 ? "" : "s") &bull; @pMat.ToString("F1")%</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="p-3 rounded-3 text-center" style="background:#cff4fc;">
+                            <div class="fw-bold fs-5">@report.TotalLaborCost.ToString("C")</div>
+                            <div style="font-size:0.75rem; color:#055160; text-transform:uppercase; letter-spacing:.05em;">Labor</div>
+                            <div style="font-size:0.72rem; color:#055160;">@report.LaborItemCount item@(report.LaborItemCount == 1 ? "" : "s") &bull; @pLab.ToString("F1")%</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="p-3 rounded-3 text-center" style="background:#d1e7dd;">
+                            <div class="fw-bold fs-5">@report.TotalEquipmentCost.ToString("C")</div>
+                            <div style="font-size:0.75rem; color:#0a3622; text-transform:uppercase; letter-spacing:.05em;">Equipment</div>
+                            <div style="font-size:0.72rem; color:#0a3622;">@report.EquipmentItemCount item@(report.EquipmentItemCount == 1 ? "" : "s") &bull; @pEqp.ToString("F1")%</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="p-3 rounded-3 text-center" style="background:#e8eaf6;">
+                            <div class="fw-bold fs-5">@projTotal.ToString("C")</div>
+                            <div style="font-size:0.75rem; color:#283593; text-transform:uppercase; letter-spacing:.05em;">Project Total</div>
+                            <div style="font-size:0.72rem; color:#283593;">@totalItems line item@(totalItems == 1 ? "" : "s")</div>
+                        </div>
+                    </div>
+                </div>
+
+                @* Stacked cost bar *@
+                @if (projTotal > 0)
+                {
+                    <div class="mb-4">
+                        <div class="d-flex rounded-3 overflow-hidden" style="height:12px;">
+                            @if (pMat > 0) { <div title="Materials @pMat.ToString("F1")%" style="width:@(pMat.ToString("F2"))%; background:#ffc107;"></div> }
+                            @if (pLab > 0) { <div title="Labor @pLab.ToString("F1")%"     style="width:@(pLab.ToString("F2"))%; background:#0dcaf0;"></div> }
+                            @if (pEqp > 0) { <div title="Equipment @pEqp.ToString("F1")%"  style="width:@(pEqp.ToString("F2"))%; background:#20c997;"></div> }
+                        </div>
+                        <div class="d-flex gap-3 mt-1" style="font-size:0.75rem; color:#6c757d;">
+                            <span><span style="color:#ffc107;">&#9632;</span> Materials</span>
+                            <span><span style="color:#0dcaf0;">&#9632;</span> Labor</span>
+                            <span><span style="color:#20c997;">&#9632;</span> Equipment</span>
+                        </div>
+                    </div>
+                }
+
+                @* Tax summary strip (shown above breakdown when tax is configured) *@
+                @if (report.TaxPercentage > 0 || report.TaxAmount > 0)
+                {
+                    <div class="tax-summary-row mb-4">
+                        <div class="section-title section-tax mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M1 0 0 1l2.2 3.081a1 1 0 0 0 .815.419h.07a1 1 0 0 1 .708.293l2.675 2.675-2.617 2.654A3.003 3.003 0 0 0 0 13a3 3 0 1 0 5.878-.851l2.654-2.617.968.968-.305.914a1 1 0 0 0 .242 1.023l3.27 3.27a.997.997 0 0 0 1.414 0l1.586-1.586a.997.997 0 0 0 0-1.414l-3.27-3.27a1 1 0 0 0-1.023-.242L10.5 9.5l-.96-.96 2.68-2.643A3.005 3.005 0 0 0 16 3q0-.405-.101-.783l-2.14 2.141L12 4l-.317-1.806 2.141-2.14A3 3 0 0 0 10 3a3.005 3.005 0 0 0 .905 2.15l-2.68 2.651-.973-.973.587-1.762a1 1 0 0 0-.242-1.023L4.327.292a1 1 0 0 0-1.414 0L1.586 1.878A.997.997 0 0 0 1 0z"/></svg>
+                            Tax &amp; Totals
+                        </div>
+                        <div class="tax-line">
+                            <span class="text-muted">Subtotal (before tax)</span>
+                            <span>@report.Subtotal.ToString("C")</span>
+                        </div>
+                        <div class="tax-line">
+                            <span class="text-muted">Tax Rate</span>
+                            <span>@report.TaxPercentage.ToString("G29")%</span>
+                        </div>
+                        <div class="tax-line">
+                            <span class="text-muted">Tax Amount</span>
+                            <span style="color:#fd7e14; font-weight:600;">@report.TaxAmount.ToString("C")</span>
+                        </div>
+                        <div class="tax-line tax-total-line">
+                            <span>Total (inc. Tax)</span>
+                            <span>@report.TotalCost.ToString("C")</span>
+                        </div>
+                    </div>
+                }
+
+                @* Line-item breakdown tables *@
+                <div class="row g-4">
+                    @* Materials *@
+                    <div class="col-12 col-xl-4">
+                        <div class="section-title section-materials">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5z"/></svg>
+                            Materials
+                        </div>
+                        @if (report.MaterialBreakdown.Any())
+                        {
+                            <table class="table table-sm breakdown-table mb-1">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th class="text-end">Qty</th>
+                                        <th class="text-end">Unit&nbsp;Cost</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in report.MaterialBreakdown.OrderByDescending(i => i.Total))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="fw-semibold">@item.Name</span>
+                                                @if (!string.IsNullOrWhiteSpace(item.Unit))
+                                                { <div class="text-muted" style="font-size:0.72rem;">per @item.Unit</div> }
+                                            </td>
+                                            <td class="text-end">@item.Quantity.ToString("G29")</td>
+                                            <td class="text-end">@item.UnitCost.ToString("C")</td>
+                                            <td class="text-end fw-semibold">@item.Total.ToString("C")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr style="border-top:2px solid #dee2e6;">
+                                        <td colspan="3" class="text-end fw-bold text-muted small" style="text-transform:uppercase;letter-spacing:.04em;">Subtotal</td>
+                                        <td class="text-end fw-bold">@report.TotalMaterialCost.ToString("C")</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted small fst-italic">No materials added.</p>
+                        }
+                    </div>
+
+                    @* Labor *@
+                    <div class="col-12 col-xl-4">
+                        <div class="section-title section-labor">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+                            Labor
+                        </div>
+                        @if (report.LaborBreakdown.Any())
+                        {
+                            <table class="table table-sm breakdown-table mb-1">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th class="text-end">Total&nbsp;Hrs</th>
+                                        <th class="text-end">Rate/hr</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in report.LaborBreakdown.OrderByDescending(i => i.Total))
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@item.Name</td>
+                                            <td class="text-end">@item.Quantity.ToString("G29")</td>
+                                            <td class="text-end">@item.UnitCost.ToString("C")</td>
+                                            <td class="text-end fw-semibold">@item.Total.ToString("C")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr style="border-top:2px solid #dee2e6;">
+                                        <td colspan="3" class="text-end fw-bold text-muted small" style="text-transform:uppercase;letter-spacing:.04em;">Subtotal</td>
+                                        <td class="text-end fw-bold">@report.TotalLaborCost.ToString("C")</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted small fst-italic">No labor entries added.</p>
+                        }
+                    </div>
+
+                    @* Equipment *@
+                    <div class="col-12 col-xl-4">
+                        <div class="section-title section-equipment">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>
+                            Equipment
+                        </div>
+                        @if (report.EquipmentBreakdown.Any())
+                        {
+                            <table class="table table-sm breakdown-table mb-1">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th class="text-end">Qty</th>
+                                        <th class="text-end">Unit&nbsp;Cost</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in report.EquipmentBreakdown.OrderByDescending(i => i.Total))
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@item.Name</td>
+                                            <td class="text-end">@item.Quantity.ToString("G29")</td>
+                                            <td class="text-end">@item.UnitCost.ToString("C")</td>
+                                            <td class="text-end fw-semibold">@item.Total.ToString("C")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr style="border-top:2px solid #dee2e6;">
+                                        <td colspan="3" class="text-end fw-bold text-muted small" style="text-transform:uppercase;letter-spacing:.04em;">Subtotal</td>
+                                        <td class="text-end fw-bold">@report.TotalEquipmentCost.ToString("C")</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted small fst-italic">No equipment added.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <span class="text-muted small">
+                    @totalItems line item@(totalItems == 1 ? "" : "s") across all categories
+                    @if (report.TaxPercentage > 0)
+                    {
+                        <span class="ms-2 badge rounded-pill" style="background:#ffe5d0; color:#7d3c00;">Tax @report.TaxPercentage.ToString("G29")%</span>
+                    }
+                </span>
+                <span class="project-total-pill">Total (inc. Tax): @report.TotalCost.ToString("C")</span>
+            </div>
+        </div>
+    }
 }
 
 @code {
     private List<ProjectReport>? reports;
-    private ProjectReport? selectedReport;
-    private string? currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        currentUserId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (!string.IsNullOrEmpty(currentUserId))
+        if (!string.IsNullOrEmpty(userId))
         {
-            reports = await ReportService.GetProjectReportsAsync(currentUserId);
+            var summaries = await ReportService.GetProjectReportsAsync(userId);
+            var tasks = summaries.Select(s => ReportService.GetProjectReportAsync(s.ProjectId, userId)).ToList();
+            var results = await Task.WhenAll(tasks);
+            reports = results.Where(r => r != null).Select(r => r!).ToList();
         }
         else
         {
             reports = new List<ProjectReport>();
-        }
-    }
-
-    private async Task ViewDetails(int projectId)
-    {
-        if (currentUserId != null)
-        {
-            selectedReport = await ReportService.GetProjectReportAsync(projectId, currentUserId);
         }
     }
 }

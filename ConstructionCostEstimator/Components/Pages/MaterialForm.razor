@@ -1,6 +1,6 @@
 @using ConstructionCostEstimator.Models
 
-<EditForm Model="MaterialModel" OnValidSubmit="Save" FormName="material-form">
+<EditForm Model="MaterialModel" OnValidSubmit="Save" FormName="material-form" id="material-form">
 
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -33,7 +33,7 @@
 
         <div class="col-md-2 d-grid">
             <label>&nbsp;</label>
-            <button class="btn btn-success" type="submit">
+            <button class="btn btn-success" type="submit" form="material-form">
                 Save
             </button>
         </div>
