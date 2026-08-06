@@ -1,7 +1,7 @@
 @using ConstructionCostEstimator.Models
 @using ConstructionCostEstimator.Services
 
-<EditForm Model="LaborModel" OnValidSubmit="Save" FormName="LaborForm">
+<EditForm Model="LaborModel" OnValidSubmit="Save" FormName="LaborForm" id="labor-form">
 
     <DataAnnotationsValidator />
 
@@ -25,15 +25,17 @@
 
         <div class="col-md-2">
             <label class="form-label">Hours</label>
-            <InputNumber class="form-control"
-                         @bind-Value="LaborModel.Hours" />
+            <InputText class="form-control"
+                       @bind-Value="hoursText"
+                       onkeydown="if(event.key === 'Enter') event.preventDefault();" />
             <ValidationMessage For="@(() => LaborModel.Hours)" class="text-danger" />
         </div>
 
         <div class="col-md-2">
             <label class="form-label">Hourly Rate</label>
-            <InputNumber class="form-control"
-                         @bind-Value="LaborModel.HourlyRate" />
+            <InputText class="form-control"
+                       @bind-Value="hourlyRateText"
+                       onkeydown="if(event.key === 'Enter') event.preventDefault();" />
             <ValidationMessage For="@(() => LaborModel.HourlyRate)" class="text-danger" />
         </div>
 
@@ -41,7 +43,7 @@
 
             <label>&nbsp;</label>
 
-            <button class="btn btn-success" type="submit">
+            <button class="btn btn-success" type="button" @onclick="Save">
                 @(LaborModel.Id == 0 ? "Add Labor" : "Save Changes")
             </button>
 
@@ -59,8 +61,42 @@
     [Parameter]
     public EventCallback<Labor> OnSave { get; set; }
 
+    private string hourlyRateText = string.Empty;
+    private string hoursText = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        hourlyRateText = LaborModel?.HourlyRate.ToString(System.Globalization.CultureInfo.CurrentCulture) ?? string.Empty;
+        hoursText = LaborModel?.Hours.ToString(System.Globalization.CultureInfo.CurrentCulture) ?? string.Empty;
+    }
+
     async Task Save()
     {
+        if (!string.IsNullOrWhiteSpace(hoursText))
+        {
+            if (decimal.TryParse(hoursText, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CurrentCulture, out var hrs))
+            {
+                LaborModel.Hours = hrs;
+            }
+            else
+            {
+                LaborModel.Hours = 0m;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(hourlyRateText))
+        {
+            if (decimal.TryParse(hourlyRateText, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CurrentCulture, out var rate))
+            {
+                LaborModel.HourlyRate = rate;
+            }
+            else
+            {
+                // If parse fails, set to 0 and allow validation to surface
+                LaborModel.HourlyRate = 0m;
+            }
+        }
+
         await OnSave.InvokeAsync(LaborModel);
     }
 

@@ -38,9 +38,6 @@ app.db
 # User-specific files
 *.rsuser
 
-# ASP.NET Core generated files
-wwwroot/lib/
-
 # Publish output
 publish/
 out/
