@@ -35,6 +35,7 @@ builder.Services.AddScoped<MaterialService>();
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<EstimateService>();
 builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<PdfService>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
