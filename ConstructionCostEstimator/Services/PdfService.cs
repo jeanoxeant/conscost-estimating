@@ -110,6 +110,107 @@ public class PdfService
                         .Text($"Material Total: {report.TotalMaterialCost:C}")
                         .Bold()
                         .FontSize(14);
+
+                        column.Item().PaddingTop(20);
+
+                        column.Item()
+                            .Text("Labor Breakdown")
+                            .FontSize(16)
+                            .Bold()
+                            .FontColor(Colors.Blue.Darken2);
+                        column.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(3);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(CellStyle).Text("Description");
+                                header.Cell().Element(CellStyle).AlignRight().Text("Hours");
+                                header.Cell().Element(CellStyle).AlignRight().Text("Rate");
+                                header.Cell().Element(CellStyle).AlignRight().Text("Total");
+                            });
+
+                            foreach (var item in report.LaborBreakdown)
+                            {
+                                table.Cell().Element(DataStyle).Text(item.Name);
+
+                                table.Cell().Element(DataStyle)
+                                    .AlignRight()
+                                    .Text(item.Quantity.ToString());
+
+                                table.Cell().Element(DataStyle)
+                                    .AlignRight()
+                                    .Text(item.UnitCost.ToString("C"));
+
+                                table.Cell().Element(DataStyle)
+                                    .AlignRight()
+                                    .Text(item.Total.ToString("C"));
+                            }
+                        });
+
+                        column.Item()
+                        .AlignRight()
+                        .PaddingTop(10)
+                        .Text($"Labor Total: {report.TotalLaborCost:C}")
+                        .Bold()
+                        .FontSize(14);
+
+                        column.Item().PaddingTop(20);
+
+                        column.Item()
+                            .Text("Equipment Breakdown")
+                            .FontSize(16)
+                            .Bold()
+                            .FontColor(Colors.Green.Darken2);
+
+                        column.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(3);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(CellStyle).Text("Equipment");
+                                header.Cell().Element(CellStyle).AlignRight().Text("Days");
+                                header.Cell().Element(CellStyle).AlignRight().Text("Daily Rate");
+                                header.Cell().Element(CellStyle).AlignRight().Text("Total");
+                            });
+
+                            foreach (var item in report.EquipmentBreakdown)
+                            {
+                                table.Cell().Element(DataStyle).Text(item.Name);
+
+                                table.Cell().Element(DataStyle)
+                                    .AlignRight()
+                                    .Text(item.Quantity.ToString());
+
+                                table.Cell().Element(DataStyle)
+                                    .AlignRight()
+                                    .Text(item.UnitCost.ToString("C"));
+
+                                table.Cell().Element(DataStyle)
+                                    .AlignRight()
+                                    .Text(item.Total.ToString("C"));
+                            }
+                        });
+
+                        column.Item()
+                        .AlignRight()
+                        .PaddingTop(10)
+                        .Text($"Equipment Total: {report.TotalEquipmentCost:C}")
+                        .Bold()
+                        .FontSize(14);
                     });
 
                 page.Footer()
