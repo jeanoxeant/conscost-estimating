@@ -211,6 +211,70 @@ public class PdfService
                         .Text($"Equipment Total: {report.TotalEquipmentCost:C}")
                         .Bold()
                         .FontSize(14);
+
+                        column.Item().PaddingTop(25);
+
+                        column.Item()
+                            .Text("Financial Summary")
+                            .FontSize(16)
+                            .Bold()
+                            .FontColor(Colors.Red.Darken2);
+
+                        column.Item()
+                        .Border(1)
+                        .Background(Colors.Grey.Lighten4)
+                        .Padding(12)
+                        .Column(summary =>
+                        {
+                            summary.Spacing(12);
+
+                            summary.Item()
+                                .Row(row =>
+                                {
+                                    row.RelativeItem().Text("Subtotal").Bold();
+                                    row.ConstantItem(120)
+                                        .AlignRight()
+                                        .Text(report.Subtotal.ToString("C"));
+                                });
+
+                            summary.Item()
+                                .Row(row =>
+                                {
+                                    row.RelativeItem().Text("Tax Rate").Bold();
+                                    row.ConstantItem(120)
+                                        .AlignRight()
+                                        .Text($"{report.TaxPercentage}%");
+                                });
+
+                            summary.Item()
+                                .Row(row =>
+                                {
+                                    row.RelativeItem().Text("Tax Amount").Bold();
+                                    row.ConstantItem(120)
+                                        .AlignRight()
+                                        .Text(report.TaxAmount.ToString("C"));
+                                });
+                        });
+
+                        column.Item()
+                        .PaddingTop(20)
+                        .Background(Colors.Blue.Lighten4)
+                        .Border(1)
+                        .Padding(12)
+                        .Row(row =>
+                        {
+                            row.RelativeItem()
+                                .Text("FINAL PROJECT TOTAL")
+                                .Bold()
+                                .FontSize(18);
+
+                            row.ConstantItem(160)
+                                .AlignRight()
+                                .Text(report.TotalCost.ToString("C"))
+                                .Bold()
+                                .FontSize(18)
+                                .FontColor(Colors.Blue.Darken3);
+                        });
                     });
 
                 page.Footer()
