@@ -96,3 +96,19 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+
+    footer {
+    background: #f0eeee;
+    color: black;
+    padding: 15px;
+    text-align: center;
+    margin-top: 10px;
+    }
+
+    footer .copyright {
+    font-weight: bold;
+    }
+
+    
+   
